@@ -4,6 +4,6 @@ using Utility;
 namespace DynamicInterpreter {
     public interface ISymbolHandler {
         string SymbolName { get; }
-        List<Option<object>> Call(List<Option<object>> args);
+        List<object> Call(List<object> args);
     }
 }

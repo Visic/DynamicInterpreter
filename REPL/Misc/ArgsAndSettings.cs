@@ -45,8 +45,8 @@ namespace REPL {
             var entryHandler = new GenericSymbolHandler(DynamicInterpreter.Constants.EntryPointSymbolName, x => x);
 
             var argHandler = new GenericSymbolHandler("arg", x => {
-                _options.TryGetValue(x[1].Value.ToString()).Apply(y => y(x.Skip(2).Select(z => z.Value.ToString().Trim('\"')).ToArray()));
-                return new List<Option<object>>();
+                _options.TryGetValue(x[1].ToString()).Apply(y => y(x.Skip(2).Select(z => z.ToString().Trim('\"')).ToArray()));
+                return new List<object>();
             });
 
             var interp = new Interpreter();

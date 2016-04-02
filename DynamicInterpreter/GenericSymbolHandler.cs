@@ -4,13 +4,13 @@ using Utility;
 
 namespace DynamicInterpreter {
     public class GenericSymbolHandler : ISymbolHandler {
-        Func<List<Option<object>>, List<Option<object>>> _call;
-        public GenericSymbolHandler(string name, Func<List<Option<object>>, List<Option<object>>> call) {
+        Func<List<object>, List<object>> _call;
+        public GenericSymbolHandler(string name, Func<List<object>, List<object>> call) {
             SymbolName = name;
             _call = call;
         }
 
         public string SymbolName { get; }
-        public List<Option<object>> Call(List<Option<object>> args) { return _call(args); }
+        public List<object> Call(List<object> args) { return _call(args); }
     }
 }

@@ -19,14 +19,14 @@ namespace REPL {
         }
 
         static void REPLPrompt() {
-            Prompt(Constants.ReplPromptName, ConsoleKey.Escape);
+            RunPrompt(Constants.ReplPromptName, ConsoleKey.Escape);
         }
 
         static void LanguagePrompt() {
-            Prompt(_languageName, ConsoleKey.Escape);
+            RunPrompt(_languageName, ConsoleKey.Escape);
         }
 
-        static void Prompt(string promptName, Union<char, ConsoleKey> breakKey) {
+        static void RunPrompt(string promptName, Union<char, ConsoleKey> breakKey) {
             string currentText = "";
             ClearLine();
             Console.Write($"{promptName}>");
