@@ -1,0 +1,24 @@
+<uppercase> = 'A'|'B'|'C'|'D'|'E'|'F'|'G'|'H'|'I'|'J'|'K'|'L'|'M'|'N'|'O'|'P'|'Q'|'R'|'S'|'T'|'U'|'V'|'W'|'X'|'Y'|'Z'
+<lowercase> = 'a'|'b'|'c'|'d'|'e'|'f'|'g'|'h'|'i'|'j'|'k'|'l'|'m'|'n'|'o'|'p'|'q'|'r'|'s'|'t'|'u'|'v'|'w'|'x'|'y'|'z'
+<digits> = '0'|'1'|'2'|'3'|'4'|'5'|'6'|'7'|'8'|'9'
+<whitespace> = ' '|'\t'|'\r\n'|'\n'
+<specialchars_no_quotes_equals_or_dash> = '!'|'#'|'$'|'%'|'&'|'\''|'('|')'|'*'|'+'|','|'.'|'/'|':'|';'|'<'|'>'|'?'|'@'|'['|']'|'^'|'_'|'`'|'{'|'|'|'}'|'~'|'\\'
+<specialchars_no_quotes_or_equals> = <specialchars_no_quotes_equals_or_dash>|'-'
+<specialchars_noquotes> = <specialchars_no_quotes_or_equals>|'='
+<chars_no_quotes_equals_or_whitespace> = <uppercase>|<lowercase>|<digits>|<specialchars_no_quotes_or_equals>
+<chars_no_quotes> = <chars_no_quotes_equals_or_whitespace>|'='|<whitespace>
+<chars_no_dash> = <specialchars_no_quotes_equals_or_dash>|'='|'"'|<uppercase>|<lowercase>|<digits>|<whitespace>
+
+<allchars_no_dash> = <chars_no_dash>|<chars_no_dash><allchars_no_dash>
+<chars_no_quotes_or_whitespace> = <lowercase>|<digits>|<uppercase>|<specialchars_noquotes>
+<allchars_no_quotes> = <chars_no_quotes>|<chars_no_quotes><allchars_no_quotes>
+<allchars_no_quotes_or_equals_or_whitespace> = <chars_no_quotes_equals_or_whitespace>|<chars_no_quotes_equals_or_whitespace><allchars_no_quotes_or_equals_or_whitespace>
+<chars_no_quotes> = <whitespace>|<chars_no_quotes_or_whitespace>
+<allwhitespace> = <whitespace>|<whitespace><allwhitespace>
+<argname_value_separator> = <allwhitespace>|<allwhitespace>'='<allwhitespace>
+<argvalue> = '"'<allchars_no_quotes>'"'|<allchars_no_quotes_or_equals_or_whitespace>
+<argvalues> = <argvalue>|<argvalue><allwhitespace><argvalues>
+<argname> = <allchars_no_quotes_or_equals_or_whitespace>
+<arg> = '-'<argname>|'-'<argname><argname_value_separator><argvalues>
+<args> = <arg>|<arg><args>
+<EntryPoint> = <allchars_no_dash><args>

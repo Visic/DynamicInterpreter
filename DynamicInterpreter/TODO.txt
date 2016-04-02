@@ -1,0 +1,5 @@
+﻿--Consider expanding grammar to be context sensitive
+	e.g.  '1'<a> = '12'
+	instead of <a> = '12'
+
+--Evaluate the performance of the generated parsers and optimize if needed
