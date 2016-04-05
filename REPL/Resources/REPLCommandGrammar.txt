@@ -1,0 +1,17 @@
+<uppercase> = 'A'|'B'|'C'|'D'|'E'|'F'|'G'|'H'|'I'|'J'|'K'|'L'|'M'|'N'|'O'|'P'|'Q'|'R'|'S'|'T'|'U'|'V'|'W'|'X'|'Y'|'Z'
+<lowercase> = 'a'|'b'|'c'|'d'|'e'|'f'|'g'|'h'|'i'|'j'|'k'|'l'|'m'|'n'|'o'|'p'|'q'|'r'|'s'|'t'|'u'|'v'|'w'|'x'|'y'|'z'
+<digit> = '0'|'1'|'2'|'3'|'4'|'5'|'6'|'7'|'8'|'9'
+<whitespace> = ' '|'\t'|'\r\n'|'\n'
+<specialchars_no_quotes> = '!'|'#'|'$'|'%'|'&'|'\''|'('|')'|'*'|'+'|','|'.'|'/'|':'|';'|'<'|'>'|'?'|'@'|'['|']'|'^'|'_'|'`'|'{'|'|'|'}'|'~'|'\\'|'-'|'='
+<letter> = <uppercase>|<lowercase>
+<alphanumeric> = <letter>|<digit>
+<no_whitespace_or_quotes> = <specialchars_no_quotes>|<alphanumeric>
+<no_quotes> = <no_whitespace_or_quotes>|<whitespace>
+
+<all_no_whitespace_or_quotes> = <no_whitespace_or_quotes>|<no_whitespace_or_quotes><all_no_whitespace_or_quotes>
+<all_no_quotes> = <no_quotes>|<no_quotes><all_no_quotes>
+<arg> = <all_no_whitespace_or_quotes>|'"'<all_no_quotes>'"'
+<args> = <arg>|<arg><whitespace><args>
+<cmdname> = <letter>|<letter><cmdname>
+<command> = <cmdname>|<cmdname><whitespace><args>
+<EntryPoint> = <command>

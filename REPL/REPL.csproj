@@ -46,7 +46,12 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Commands\HelpCommand.cs" />
+    <Compile Include="Commands\ListCommand.cs" />
+    <Compile Include="Commands\REPLCommand.cs" />
+    <Compile Include="DataStructures\NavigableBuffer.cs" />
     <Compile Include="Misc\ArgsAndSettings.cs" />
+    <Compile Include="Misc\BetterConsole.cs" />
     <Compile Include="Misc\Constants.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -68,9 +73,7 @@
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Commands\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <ProjectReference Include="..\DynamicInterpreter\DynamicInterpreter.csproj">
       <Project>{14009445-aec1-4f7e-b428-9bb070a33510}</Project>
@@ -85,6 +88,9 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\CommandlineGrammar.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\REPLCommandGrammar.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

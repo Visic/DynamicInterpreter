@@ -1,5 +1,4 @@
-﻿--Consider expanding grammar to be context sensitive
-	e.g.  '1'<a> = '12'
-	instead of <a> = '12'
-
+﻿--Consider adding negative matches
+--Consider adding inverse matches
+--Add support for the empty set match ''
 --Evaluate the performance of the generated parsers and optimize if needed

@@ -13,6 +13,7 @@ namespace DynamicInterpreter {
 
         public Option<string> Setup(string grammar, params ISymbolHandler[] handlers) {
             _handlers = handlers.ToDictionary(x => x.SymbolName);
+            if (!_handlers.ContainsKey(Constants.EntryPointSymbolName)) _handlers[Constants.EntryPointSymbolName] = new GenericSymbolHandler(Constants.EntryPointSymbolName, x => x);
             return CodeParserGenerator.GenerateParsers(grammar).Match(
                 defs => { _parsers = defs; },
                 err => err
