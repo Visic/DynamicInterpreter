@@ -6,8 +6,61 @@ using System.Threading.Tasks;
 using Utility;
 
 namespace REPL {
-    //TODO:: Parameterize move functions to allow stopping movement at the Mark instead of just the buffer bounds
-    public static class BetterConsole {
+    public class BetterConsole {
+        private BetterConsole() { }
+
+        public struct Key {
+            int _hashcode;
+            public Key(ConsoleKey key, ConsoleModifiers keyModifiers = 0) {
+                ConsoleKey = key;
+                KeyModifiers = keyModifiers;
+                _hashcode = int.Parse($"{(int)ConsoleKey}{KeyModifiers}");
+            }
+
+            public readonly ConsoleKey ConsoleKey;
+            public readonly ConsoleModifiers KeyModifiers;
+
+            public static implicit operator Key(ConsoleKey consoleKey) {
+                return new Key(consoleKey);
+            }
+
+            #region equals
+            public override bool Equals(object obj) {
+                if (obj is Key) return (Key)obj == this;
+                if (obj is ConsoleKeyInfo) return (ConsoleKeyInfo)obj == this;
+                return false;
+            }
+
+            public override int GetHashCode() {
+                return _hashcode;
+            }
+
+            public static bool operator ==(Key key1, Key key2) {
+                return key1.ConsoleKey == key2.ConsoleKey && key1.KeyModifiers == key2.KeyModifiers;
+            }
+
+            public static bool operator !=(Key key, Key keyInfo) {
+                return !(key == keyInfo);
+            }
+
+            public static bool operator ==(Key key, ConsoleKeyInfo keyInfo) {
+                return key.ConsoleKey == keyInfo.Key && key.KeyModifiers == keyInfo.Modifiers;
+            }
+
+            public static bool operator !=(Key key, ConsoleKeyInfo keyInfo) {
+                return !(key == keyInfo);
+            }
+
+            public static bool operator ==(ConsoleKeyInfo keyInfo, Key key) {
+                return key.ConsoleKey == keyInfo.Key && key.KeyModifiers == keyInfo.Modifiers;
+            }
+
+            public static bool operator !=(ConsoleKeyInfo keyInfo, Key key) {
+                return !(key == keyInfo);
+            }
+            #endregion
+        }
+
         static NavigableBuffer<char> _buffer = new NavigableBuffer<char>();
 
         static BetterConsole() {
@@ -32,6 +85,55 @@ namespace REPL {
             set { _buffer.CursorY.Value = value; }
         }
 
+        public static Tuple<Key, Func<string, bool>> MakeKeyHandler(Key key, Func<string, bool> handler) {
+            return Tuple.Create(key, handler);
+        }
+
+        public static void Prompt(string prompt, params Tuple<Key, Func<string, bool>>[] keyHandlers) {
+            Func<string> getCurrentText = () => {
+                var curX = CursorX;
+                var curY = CursorY;
+                _buffer.MoveToNextMark();
+                var result = GetToPreviousMark();
+                CursorX = curX;
+                CursorY = curY;
+                return result;
+            };
+
+            _buffer.ClearLine();
+            Write(prompt);
+            _buffer.MarkPos();
+            while (true) {
+                var key = Console.ReadKey(true);
+                var shouldBreak = keyHandlers.Aggregate(false, (acc, val) => val.Item1 == key ? acc || val.Item2(getCurrentText()) : acc);
+                if (shouldBreak) break;
+
+                if (key.Key == ConsoleKey.LeftArrow) {
+                    _buffer.MoveLeft(true);
+                } else if (key.Key == ConsoleKey.RightArrow) {
+                    _buffer.MoveRight(true);
+                } else if (key.Key == ConsoleKey.UpArrow) {
+                    _buffer.MoveUp(true);
+                } else if (key.Key == ConsoleKey.DownArrow) {
+                    if (!_buffer.MoveDown(true)) {
+                        _buffer.MoveToNextMark();
+                        ClearToPreviousMark();
+                        _buffer.RemoveNextMark();
+                    }
+                } else if (key.Key == ConsoleKey.Backspace) {
+                    RemoveNearbyChar(true);
+                } else if (key.Key == ConsoleKey.Delete) {
+                    RemoveNearbyChar(false);
+                } else {
+                    var textAfterPrompt = GetToPreviousMark().Length > 0;
+                    Write(key.KeyChar);
+                    if (textAfterPrompt) _buffer.RemovePreviousMark(); //TODO:: Handle insertion
+                    _buffer.MarkPos();
+                }
+            }
+            _buffer.RemoveAllMarks();
+        }
+
         public static void Write(string val) {
             Write(val.Split('\n'));
         }
@@ -39,7 +141,7 @@ namespace REPL {
         public static void Write(params string[] lines) {
             Methods.For(lines, (i, line) => {
                 _buffer.Write(line);
-                if (lines.Length > 1 && i < lines.Length - 1) SetCursorPos(0, CursorY + 1);
+                if (lines.Length > 1 && i < lines.Length - 1) _buffer.SetCursorPos(0, CursorY + 1);
             });
         }
 
@@ -68,93 +170,53 @@ namespace REPL {
 
         public static void WriteLine(object val) {
             Write(val);
-            SetCursorPos(0, CursorY + 1);
+            _buffer.SetCursorPos(0, CursorY + 1);
+        }
+
+        public static void WriteLine() {
+            _buffer.SetCursorPos(0, CursorY + 1);
         }
 
         public static void WriteLine(string fmtstr, params object[] args) {
             Write(fmtstr, args);
-            SetCursorPos(0, CursorY + 1);
+            _buffer.SetCursorPos(0, CursorY + 1);
         }
 
-        public static void Backspace() {
-            if(_buffer.MoveLeft()) _buffer.Write(false, ' ');
-        }
+        private static void RemoveNearbyChar(bool left) {
+            if ((left && !_buffer.MoveLeft(true)) || (!left && _buffer.DistanceToNextMark().IsNone)) return;
 
-        public static void ClearLine() {
-            _buffer.ClearLine();
-        }
+            var rest = _buffer.GetToNextMark().ToList();
+            rest.Add('\0');
 
-        public static bool MoveLeft() {
-            return _buffer.MoveLeft(true);
-        }
-
-        public static bool MoveRight() {
-            return _buffer.MoveRight(true);
-        }
-
-        public static bool MoveUp() {
-            return _buffer.MoveUp(true);
-        }
-
-        public static bool MoveDown() {
-            return _buffer.MoveDown(true);
-        }
-
-        public static bool MoveToNextLine() {
-            return _buffer.SetCursorPos(0, _buffer.CursorY.Value + 1);
-        }
-
-        public static bool SetCursorPos(int x, int y) {
-            return _buffer.SetCursorPos(x, y);
-        }
-
-        public static void MarkPos() {
+            _buffer.Write(rest.Skip(1), false);
             _buffer.MarkPos();
-        }
-
-        public static bool IsOnMArk() {
-            return _buffer.IsOnMark();
-        }
-
-        public static void MoveToNextMark() {
             _buffer.MoveToNextMark();
-        }
-
-        public static void MoveToPreviousMark() {
+            _buffer.RemoveCurrentMark();
+            _buffer.MoveLeft(true);
+            _buffer.MarkPos();
             _buffer.MoveToPreviousMark();
-        }
-
-        public static void RemoveAllMarks() {
-            _buffer.RemoveAllMarks();
-        }
-
-        public static void RemoveCurrentMark() {
             _buffer.RemoveCurrentMark();
         }
 
-        public static void RemoveNextMark() {
-            _buffer.RemoveNextMark();
+        private static bool MoveToNextLine() {
+            return _buffer.SetCursorPos(0, _buffer.CursorY.Value + 1);
         }
 
-        public static void RemovePreviousMark() {
-            _buffer.RemovePreviousMark();
-        }
-
-        public static string GetToNextMark() {
+        private static string GetToNextMark() {
             return new string(_buffer.GetToNextMark()).Trim('\0');
         }
 
-        public static string GetToPreviousMark() {
+        private static string GetToPreviousMark() {
             return new string(_buffer.GetToPreviousMark()).Trim('\0');
         }
 
-        public static void ClearToNextMark() {
+        private static void ClearToNextMark() {
             _buffer.VisitToNextMark((pos, prevVal, curVal) => {
                 _buffer.Write(false, ' ');
             });
         }
 
-        public static void ClearToPreviousMark() {
+        private static void ClearToPreviousMark() {
             _buffer.VisitToPreviousMark((pos, prevVal, curVal) => {
                 _buffer.Write(false, ' ');
             });

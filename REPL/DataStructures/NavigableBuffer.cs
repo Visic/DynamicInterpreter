@@ -20,6 +20,10 @@ namespace REPL {
                 if (obj is int) return BufferIndex.CompareTo((int)obj);
                 return BufferIndex.CompareTo(((Mark)obj).BufferIndex);
             }
+
+            public override string ToString() {
+                return $"{BufferIndex}  ({CursorX}, {CursorY})";
+            }
         }
 
         public event EventHandler<Tuple<int, int>> PositionChanged;
@@ -60,7 +64,7 @@ namespace REPL {
         public Property<int> Height { get; }
 
         public void Write(IEnumerable<T> vals, bool advanceCursor = true) {
-            Write(true, vals.ToArray());
+            Write(advanceCursor, vals.ToArray());
         }
 
         public void Write(bool advanceCursor = true, params T[] vals) {
@@ -84,6 +88,14 @@ namespace REPL {
 
         public void MarkPos() {
             _marks.Add(new Mark(CurrentPos(), CursorX.Value, CursorY.Value));
+        }
+
+        public Option<int> DistanceToNextMark() {
+            return GetNextMarkIndex().Apply(x => x - CurrentPos());
+        }
+
+        public Option<int> DistanceToPreviousMark() {
+            return GetPreviousMarkIndex().Apply(x => CurrentPos() - x);
         }
 
         public void MoveToNextMark() {
@@ -230,6 +242,7 @@ namespace REPL {
             return maybeIndex.Apply(index => GetPosFromIndex(index));
         }
 
+        //Action<pos, previous, current>
         private void VisitToMark(Func<Option<int>> getMarkIndex, Action<Tuple<int, int>, Option<T>, Option<T>> visitor, bool actuallyMove) {
             getMarkIndex().Apply(index => {
                 var startPos = CurrentPos();

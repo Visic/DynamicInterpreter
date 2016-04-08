@@ -38,40 +38,13 @@ namespace REPL {
         }
 
         private static void Prompt(string promptText, Action<string> handler) {
-            BetterConsole.ClearLine();
-            BetterConsole.Write($"{promptText}>");
-            BetterConsole.MarkPos();
-            while(true) {
-                var key = Console.ReadKey(true);
-                if(key.Key == ConsoleKey.Escape) break; //switch prompts
-
-                if(key.Key == ConsoleKey.Enter) {
-                    handler(BetterConsole.GetToPreviousMark());
-                    BetterConsole.RemoveAllMarks();
-                    BetterConsole.WriteOnNextLine($"{promptText}>");
-                    BetterConsole.MarkPos();
-                } else if(key.Key == ConsoleKey.LeftArrow) {
-                    BetterConsole.MoveLeft();
-                } else if(key.Key == ConsoleKey.RightArrow) {
-                    BetterConsole.MoveRight();
-                } else if(key.Key == ConsoleKey.UpArrow) {
-                    BetterConsole.MoveUp();
-                } else if(key.Key == ConsoleKey.DownArrow) {
-                    if (!BetterConsole.MoveDown()) {
-                        BetterConsole.MoveToNextMark();
-                        BetterConsole.ClearToPreviousMark();
-                        BetterConsole.RemoveNextMark();
-                    }
-                } else if(key.Key == ConsoleKey.Backspace) {
-                    BetterConsole.Backspace();
-                    BetterConsole.RemoveNextMark();
-                    BetterConsole.MarkPos();
-                } else {
-                    var textAfterPrompt = BetterConsole.GetToPreviousMark().Length > 0;
-                    BetterConsole.Write(key.KeyChar);
-                    if (textAfterPrompt) BetterConsole.RemovePreviousMark(); //TODO:: Handle insertion
-                    BetterConsole.MarkPos();
-                }
+            var done = false;
+            while(!done) {
+                BetterConsole.Prompt(
+                    $"{promptText}>", 
+                    BetterConsole.MakeKeyHandler(ConsoleKey.Escape, v => done = true),
+                    BetterConsole.MakeKeyHandler(ConsoleKey.Enter, v => { handler(v); BetterConsole.WriteLine(); return true; })
+                );
             }
         }
     }
