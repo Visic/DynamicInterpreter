@@ -12,6 +12,8 @@ namespace REPL {
         static Dictionary<string, REPLCommand> _replCommands = new Dictionary<string, REPLCommand>();
         static Interpreter _commandInterp = new Interpreter();
         static string _languageName = "";
+        static List<string> _cmdBuffer = new List<string>();
+        static List<string> _langBuffer = new List<string>();
 
         public static void Main(string[] args) {
             SetupREPLCommands();
@@ -19,8 +21,8 @@ namespace REPL {
             _commandInterp.Setup(Resources.REPLCommandGrammar, new IgnoreSymbolHandler("whitespace"), new CombineToStringSymbolHandler("arg"), new CombineToStringSymbolHandler("cmdname"), commandHandler);
 
             while(true) { //handle switching prompts
-                Prompt(Constants.ReplPromptName, x => { _commandInterp.Execute(x); });
-                Prompt(_languageName, x => { });
+                Prompt(Constants.ReplPromptName, x => { _commandInterp.Execute(x); }, _cmdBuffer);
+                Prompt(_languageName, x => { }, _langBuffer);
             }
         }
 
@@ -37,13 +39,21 @@ namespace REPL {
             return new List<object>();
         }
 
-        private static void Prompt(string promptText, Action<string> handler) {
+        private static void Prompt(string promptText, Action<string> handler, List<string> buffer) {
             var done = false;
             while(!done) {
                 BetterConsole.Prompt(
                     $"{promptText}>", 
+                    buffer,
                     BetterConsole.MakeKeyHandler(ConsoleKey.Escape, v => done = true),
-                    BetterConsole.MakeKeyHandler(ConsoleKey.Enter, v => { handler(v); BetterConsole.WriteLine(); return true; })
+                    BetterConsole.MakeKeyHandler(ConsoleKey.Enter, v => {
+                        buffer.Remove(v);
+                        buffer.Add(v);
+
+                        handler(v);
+                        BetterConsole.WriteLine();
+                        return true;
+                    })
                 );
             }
         }

@@ -118,16 +118,16 @@ namespace REPL {
             _marks.Clear();
         }
 
-        public void RemoveCurrentMark() {
-            RemoveMark(GetCurrentMarkIndex);
+        public bool RemoveCurrentMark() {
+            return RemoveMark(GetCurrentMarkIndex);
         }
 
-        public void RemoveNextMark() {
-            RemoveMark(GetNextMarkIndex);
+        public bool RemoveNextMark() {
+            return RemoveMark(GetNextMarkIndex);
         }
 
-        public void RemovePreviousMark() {
-            RemoveMark(GetPreviousMarkIndex);
+        public bool RemovePreviousMark() {
+            return RemoveMark(GetPreviousMarkIndex);
         }
 
         public T[] GetToNextMark() {
@@ -288,10 +288,11 @@ namespace REPL {
             return result;
         }
 
-        private void RemoveMark(Func<Option<int>> getMarkIndex) {
-            getMarkIndex().Apply(index => {
+        private bool RemoveMark(Func<Option<int>> getMarkIndex) {
+            return getMarkIndex().Apply(index => {
                 _marks.Remove(_marks[index]);
-            });
+                return true;
+            }).IsSome;
         }
         
         private Option<int> GetNextMarkIndex() {

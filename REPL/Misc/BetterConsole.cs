@@ -26,8 +26,8 @@ namespace REPL {
 
             #region equals
             public override bool Equals(object obj) {
-                if (obj is Key) return (Key)obj == this;
-                if (obj is ConsoleKeyInfo) return (ConsoleKeyInfo)obj == this;
+                if(obj is Key) return (Key)obj == this;
+                if(obj is ConsoleKeyInfo) return (ConsoleKeyInfo)obj == this;
                 return false;
             }
 
@@ -75,12 +75,14 @@ namespace REPL {
             _buffer.PositionChanged += (s, pos) => Console.SetCursorPosition(pos.Item1, pos.Item2);
         }
 
-        public static int CursorX {
+        public static int CursorX
+        {
             get { return _buffer.CursorX.Value; }
             set { _buffer.CursorX.Value = value; }
         }
 
-        public static int CursorY {
+        public static int CursorY
+        {
             get { return _buffer.CursorY.Value; }
             set { _buffer.CursorY.Value = value; }
         }
@@ -89,7 +91,7 @@ namespace REPL {
             return Tuple.Create(key, handler);
         }
 
-        public static void Prompt(string prompt, params Tuple<Key, Func<string, bool>>[] keyHandlers) {
+        public static void Prompt(string prompt, IReadOnlyList<string> prevCmds, params Tuple<Key, Func<string, bool>>[] keyHandlers) {
             Func<string> getCurrentText = () => {
                 var curX = CursorX;
                 var curY = CursorY;
@@ -100,35 +102,40 @@ namespace REPL {
                 return result;
             };
 
+            var index = prevCmds.Count;
             _buffer.ClearLine();
             Write(prompt);
             _buffer.MarkPos();
-            while (true) {
+            _buffer.MarkPos();
+            while(true) {
                 var key = Console.ReadKey(true);
                 var shouldBreak = keyHandlers.Aggregate(false, (acc, val) => val.Item1 == key ? acc || val.Item2(getCurrentText()) : acc);
-                if (shouldBreak) break;
+                if(shouldBreak) break;
 
-                if (key.Key == ConsoleKey.LeftArrow) {
+                if(key.Key == ConsoleKey.LeftArrow) {
                     _buffer.MoveLeft(true);
-                } else if (key.Key == ConsoleKey.RightArrow) {
+                } else if(key.Key == ConsoleKey.RightArrow) {
                     _buffer.MoveRight(true);
-                } else if (key.Key == ConsoleKey.UpArrow) {
-                    _buffer.MoveUp(true);
-                } else if (key.Key == ConsoleKey.DownArrow) {
-                    if (!_buffer.MoveDown(true)) {
-                        _buffer.MoveToNextMark();
-                        ClearToPreviousMark();
-                        _buffer.RemoveNextMark();
+                } else if(key.Key == ConsoleKey.UpArrow) {
+                    if(!_buffer.MoveUp(true)) {
+                        RemoveCurrentPromptInput();
+                        if(index >= 0) --index;
+                        if(index >= 0 && prevCmds.Count > 0) Write(prevCmds[index]);
                     }
-                } else if (key.Key == ConsoleKey.Backspace) {
+                } else if(key.Key == ConsoleKey.DownArrow) {
+                    if(!_buffer.MoveDown(true)) {
+                        RemoveCurrentPromptInput();
+                        if(index < prevCmds.Count) ++index;
+                        if(index < prevCmds.Count && prevCmds.Count > 0) Write(prevCmds[index]);
+                    }
+                } else if(key.Key == ConsoleKey.Backspace) {
                     RemoveNearbyChar(true);
-                } else if (key.Key == ConsoleKey.Delete) {
+                } else if(key.Key == ConsoleKey.Delete) {
                     RemoveNearbyChar(false);
                 } else {
-                    var textAfterPrompt = GetToPreviousMark().Length > 0;
+                    if(key.KeyChar == '\0') continue;
+                    ShiftRest(false);
                     Write(key.KeyChar);
-                    if (textAfterPrompt) _buffer.RemovePreviousMark(); //TODO:: Handle insertion
-                    _buffer.MarkPos();
                 }
             }
             _buffer.RemoveAllMarks();
@@ -141,7 +148,7 @@ namespace REPL {
         public static void Write(params string[] lines) {
             Methods.For(lines, (i, line) => {
                 _buffer.Write(line);
-                if (lines.Length > 1 && i < lines.Length - 1) _buffer.SetCursorPos(0, CursorY + 1);
+                if(lines.Length > 1 && i < lines.Length - 1) _buffer.SetCursorPos(0, CursorY + 1);
             });
         }
 
@@ -183,16 +190,24 @@ namespace REPL {
         }
 
         private static void RemoveNearbyChar(bool left) {
-            if ((left && !_buffer.MoveLeft(true)) || (!left && _buffer.DistanceToNextMark().IsNone)) return;
+            if(left && !_buffer.MoveLeft(true)) return;
+            ShiftRest(true);
+        }
 
+        private static void ShiftRest(bool left) {
             var rest = _buffer.GetToNextMark().ToList();
-            rest.Add('\0');
-
-            _buffer.Write(rest.Skip(1), false);
+            rest = left ? rest.Add_Ex('\0').Skip(1).ToList() : rest.Insert_Ex(0, '\0');
+            if(rest.Count == 0) return;
             _buffer.MarkPos();
-            _buffer.MoveToNextMark();
-            _buffer.RemoveCurrentMark();
-            _buffer.MoveLeft(true);
+            _buffer.Write(rest, true);
+
+            if(left) {
+                _buffer.RemoveCurrentMark();
+                _buffer.MoveLeft(true);
+            } else {
+                _buffer.RemovePreviousMark();
+            }
+
             _buffer.MarkPos();
             _buffer.MoveToPreviousMark();
             _buffer.RemoveCurrentMark();
@@ -202,18 +217,15 @@ namespace REPL {
             return _buffer.SetCursorPos(0, _buffer.CursorY.Value + 1);
         }
 
-        private static string GetToNextMark() {
-            return new string(_buffer.GetToNextMark()).Trim('\0');
-        }
-
         private static string GetToPreviousMark() {
             return new string(_buffer.GetToPreviousMark()).Trim('\0');
         }
 
-        private static void ClearToNextMark() {
-            _buffer.VisitToNextMark((pos, prevVal, curVal) => {
-                _buffer.Write(false, ' ');
-            });
+        private static void RemoveCurrentPromptInput() {
+            _buffer.MoveToNextMark();
+            ClearToPreviousMark();
+            _buffer.RemoveNextMark();
+            _buffer.MarkPos();
         }
 
         private static void ClearToPreviousMark() {
