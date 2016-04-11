@@ -8,7 +8,7 @@ using Utility;
 namespace DynamicInterpreter {
     public class Interpreter {
         Dictionary<string, SymbolParser> _parsers;
-        string _leftOverCode;
+        //string _leftOverCode;
         Dictionary<string, ISymbolHandler> _handlers;
 
         public Option<string> Setup(string grammar, params ISymbolHandler[] handlers) {
@@ -22,7 +22,8 @@ namespace DynamicInterpreter {
 
         public List<object> Execute(string code) {
             var parserResult = new Parser.Result();
-            _leftOverCode = _parsers[Constants.EntryPointSymbolName].Parse(_leftOverCode + code, parserResult);
+            _parsers[Constants.EntryPointSymbolName].Parse(code, parserResult);
+            //_leftOverCode = _parsers[Constants.EntryPointSymbolName].Parse(_leftOverCode + code, parserResult);
             return RecursiveEval(parserResult);
         }
 

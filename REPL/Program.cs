@@ -9,33 +9,32 @@ using Utility;
 
 namespace REPL {
     public class Program {
-        static Dictionary<string, REPLCommand> _replCommands = new Dictionary<string, REPLCommand>();
+        public static string LanguageName = "";
+        public static Interpreter _languageInterp;
+
+        static CommandDictionary _replCommands = new CommandDictionary();
         static Interpreter _commandInterp = new Interpreter();
-        static string _languageName = "";
         static List<string> _cmdBuffer = new List<string>();
         static List<string> _langBuffer = new List<string>();
 
         public static void Main(string[] args) {
-            SetupREPLCommands();
             var commandHandler = new GenericSymbolHandler("command", CallREPLCommand);
-            _commandInterp.Setup(Resources.REPLCommandGrammar, new IgnoreSymbolHandler("whitespace"), new CombineToStringSymbolHandler("arg"), new CombineToStringSymbolHandler("cmdname"), commandHandler);
+            _commandInterp.Setup(Resources.REPLCommandGrammar, new CombineToStringSymbolHandler("arg"), new CombineToStringSymbolHandler("cmdname"), commandHandler);
 
             while(true) { //handle switching prompts
                 Prompt(Constants.ReplPromptName, x => { _commandInterp.Execute(x); }, _cmdBuffer);
-                Prompt(_languageName, x => { }, _langBuffer);
+                Prompt(LanguageName, x => {
+                    if(_languageInterp != null) BetterConsole.WriteOnNextLine($"({string.Join(", ", _languageInterp.Execute(x).ToArray())})");
+                    else BetterConsole.WriteOnNextLine("Language not loaded. Use REPL Command {Language} to load a language assembly.");
+                }, _langBuffer);
             }
         }
 
-        private static void SetupREPLCommands() {
-            Action<REPLCommand> addCmd = x => _replCommands[x.Name.ToLower()] = x;
-            addCmd(new HelpCommand(_replCommands));
-            addCmd(new ListCommand(_replCommands));
-        }
-
         private static List<object> CallREPLCommand(List<object> args) {
-            var maybeCmd = _replCommands.TryGetValue(((string)args[0]).ToLower());
-            if(maybeCmd.IsNone) BetterConsole.WriteOnNextLine(Constants.UnknownCmdFmtStr, args[0]);
-            else maybeCmd.Value.Call(args.Skip(1).ToList());
+            var strArgs = args.Select(x => (string)x).Where(x => !string.IsNullOrWhiteSpace(x)).Select(x => x.Trim('"')).ToList();
+            var maybeCmd = _replCommands.TryGetValue(strArgs[0].ToLower());
+            if(maybeCmd.IsNone) BetterConsole.WriteOnNextLine(Constants.UnknownCmdFmtStr, strArgs[0]);
+            else maybeCmd.Value.Call(strArgs.Skip(1).ToList());
             return new List<object>();
         }
 
@@ -47,10 +46,12 @@ namespace REPL {
                     buffer,
                     BetterConsole.MakeKeyHandler(ConsoleKey.Escape, v => done = true),
                     BetterConsole.MakeKeyHandler(ConsoleKey.Enter, v => {
-                        buffer.Remove(v);
-                        buffer.Add(v);
+                        if(!string.IsNullOrEmpty(v)) {
+                            buffer.Remove(v);
+                            buffer.Add(v);
+                            handler(v);
+                        }
 
-                        handler(v);
                         BetterConsole.WriteLine();
                         return true;
                     })

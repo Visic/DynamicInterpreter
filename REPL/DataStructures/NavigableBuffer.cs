@@ -91,11 +91,11 @@ namespace REPL {
         }
 
         public Option<int> DistanceToNextMark() {
-            return GetNextMarkIndex().Apply(x => x - CurrentPos());
+            return GetNextMarkIndex().Apply(x => _marks[x].BufferIndex - CurrentPos());
         }
 
         public Option<int> DistanceToPreviousMark() {
-            return GetPreviousMarkIndex().Apply(x => CurrentPos() - x);
+            return GetPreviousMarkIndex().Apply(x => CurrentPos() - _marks[x].BufferIndex);
         }
 
         public void MoveToNextMark() {
@@ -315,6 +315,7 @@ namespace REPL {
         }
 
         private int CurrentPos() {
+            var temp = CursorY.Value * Width.Value + CursorX.Value;
             return CursorY.Value * Width.Value + CursorX.Value;
         }
 

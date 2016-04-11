@@ -120,13 +120,21 @@ namespace REPL {
                     if(!_buffer.MoveUp(true)) {
                         RemoveCurrentPromptInput();
                         if(index >= 0) --index;
-                        if(index >= 0 && prevCmds.Count > 0) Write(prevCmds[index]);
+                        if(index >= 0 && prevCmds.Count > 0) {
+                            Write(prevCmds[index]);
+                            _buffer.RemovePreviousMark();
+                            _buffer.MarkPos();
+                        }
                     }
                 } else if(key.Key == ConsoleKey.DownArrow) {
                     if(!_buffer.MoveDown(true)) {
                         RemoveCurrentPromptInput();
                         if(index < prevCmds.Count) ++index;
-                        if(index < prevCmds.Count && prevCmds.Count > 0) Write(prevCmds[index]);
+                        if(index < prevCmds.Count && prevCmds.Count > 0) {
+                            Write(prevCmds[index]);
+                            _buffer.RemovePreviousMark();
+                            _buffer.MarkPos();
+                        }
                     }
                 } else if(key.Key == ConsoleKey.Backspace) {
                     RemoveNearbyChar(true);
@@ -223,6 +231,7 @@ namespace REPL {
 
         private static void RemoveCurrentPromptInput() {
             _buffer.MoveToNextMark();
+            if(_buffer.DistanceToPreviousMark().Apply(x => x == 0 ? new Option<int>() : x).IsNone) return;
             ClearToPreviousMark();
             _buffer.RemoveNextMark();
             _buffer.MarkPos();

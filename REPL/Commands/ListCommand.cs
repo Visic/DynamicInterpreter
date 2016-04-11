@@ -9,14 +9,12 @@ namespace REPL {
         Dictionary<string, REPLCommand> _commands;
         public ListCommand(Dictionary<string, REPLCommand> commands) { _commands = commands; }
 
+        public override string CommandInfo { get; } = "This command prints a list of all available REPL commands.";
         public override string Name { get; } = Constants.ListCmdName;
+        public override int RequiredArgNum { get; } = 0;
 
-        public override void Call(List<object> args) {
+        protected override void ExecuteCmd(List<string> args) {
             BetterConsole.WriteOnNextLine($"Available commands: {string.Join(", ", _commands.Values.Select(x => x.Name).ToArray())}");
-        }
-
-        public override void Help() {
-            BetterConsole.WriteOnNextLine("This command prints a list of all available REPL commands.");
         }
     }
 }

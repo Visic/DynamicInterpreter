@@ -1,4 +1,5 @@
-﻿--Consider adding negative matches
+﻿--Consider adding negative matches (non-consuming, will just make the parser fail if the predicate matches)
 --Consider adding inverse matches
---Add support for the empty set match ''
+--Consider adding range support (e.g. any lowercase char [a-z])
+--Add support for the empty string match ''
 --Evaluate the performance of the generated parsers and optimize if needed
