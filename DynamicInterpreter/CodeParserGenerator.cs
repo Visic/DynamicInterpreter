@@ -7,8 +7,10 @@ using Utility;
 
 namespace DynamicInterpreter {
     public abstract class Parser {
+        public enum State { Success, Failure }
+
         public class Result : List<Union<string, Tuple<string, Result>>> { }
-        public abstract string Parse(string data, Result acc);
+        public abstract Tuple<State, string> Parse(string data, Result acc);
     }
 
     //this parser parses the symbol's definition
@@ -22,29 +24,57 @@ namespace DynamicInterpreter {
                 () => new AnyParser(
                     def.Definition.Split(x => x.TokenType == Token.Type.Bar)
                                   .Select(
-                                      x => new InOrderParser(
-                                          x.Select<Token, Parser>(
-                                              y => {
-                                                  switch (y.TokenType) {
-                                                      case Token.Type.Symbol:
-                                                          return symbolParsers[y.Value];
-                                                      case Token.Type.Literal:
-                                                          return new LiteralParser(y.Value);
-                                                  }
-                                                  throw new Exception("Unknown token type");
+                                      x => {
+                                          var negativeMatch = false;
+                                          var parsers = new List<Parser>();
+                                          Methods.For(x, ele => {
+                                              var relevantParser = new Option<Parser>();
+                                              switch(ele.TokenType) {
+                                                  case Token.Type.Symbol:
+                                                      relevantParser = symbolParsers[ele.Value];
+                                                      break;
+                                                  case Token.Type.Literal:
+                                                      relevantParser = new LiteralParser(ele.Value);
+                                                      break;
+                                                  case Token.Type.NegativeMatch:
+                                                      negativeMatch = true;
+                                                      break;
+                                                  default:
+                                                      throw new Exception("Unknown token type");
                                               }
-                                          ).ToArray()
-                                      )
+
+                                              relevantParser.Apply(p => {
+                                                  if(negativeMatch) {
+                                                      p = new NegativeMatchParser(p);
+                                                      negativeMatch = false;
+                                                  }
+                                                  parsers.Add(p);
+                                              });
+                                          });
+                                          return new InOrderParser(parsers.ToArray());
+                                      }
                                   ).ToArray()
                 )
             );
         }
 
-        public override string Parse(string data, Result acc) {
+        public override Tuple<State, string> Parse(string data, Result acc) {
             var newAcc = new Result();
             var result = _parser.Value.Parse(data, newAcc);
-            if (result.Length < data.Length) acc.Add(Tuple.Create(_name, newAcc));
+            if (result.Item1 == State.Success) acc.Add(Tuple.Create(_name, newAcc));
             return result;
+        }
+    }
+
+    public class NegativeMatchParser : Parser {
+        Parser _parserToNegate;
+        public NegativeMatchParser(Parser parserToNegate) { _parserToNegate = parserToNegate; }
+
+        public override Tuple<State, string> Parse(string data, Result acc) {
+            var newAcc = new Result();
+            var result = _parserToNegate.Parse(data, newAcc);
+            if(result.Item1 == State.Success) return Tuple.Create(State.Failure, data);
+            return Tuple.Create(State.Success, data);
         }
     }
 
@@ -55,10 +85,12 @@ namespace DynamicInterpreter {
             _literal = literal;
         }
 
-        public override string Parse(string data, Result acc) {
-            if (data.StartsWith(_literal)) data = data.Remove(0, _literal.Length);
-            acc.Add(_literal);
-            return data;
+        public override Tuple<State, string> Parse(string data, Result acc) {
+            if(data.StartsWith(_literal)) {
+                acc.Add(_literal);
+                return Tuple.Create(State.Success, data.Remove(0, _literal.Length));
+            }
+            return Tuple.Create(State.Failure, data);
         }
     }
 
@@ -67,16 +99,16 @@ namespace DynamicInterpreter {
 
         public InOrderParser(params Parser[] parsers) { _parsers = parsers; }
 
-        public override string Parse(string data, Result acc) {
+        public override Tuple<State, string> Parse(string data, Result acc) {
             var newAcc = new Result();
             var result = data;
             foreach (var parser in _parsers) {
                 var partialResult = parser.Parse(result, newAcc);
-                if (partialResult.Length == result.Length) return data;
-                result = partialResult;
+                if (partialResult.Item1 == State.Failure) return Tuple.Create(State.Failure, data);
+                result = partialResult.Item2;
             }
             acc.AddRange(newAcc);
-            return result;
+            return Tuple.Create(State.Success, result);
         }
     }
 
@@ -86,15 +118,18 @@ namespace DynamicInterpreter {
 
         public AnyParser(params Parser[] parsers) { _parsers = parsers; }
 
-        public override string Parse(string data, Result acc) {
+        public override Tuple<State, string> Parse(string data, Result acc) {
             var result = _parsers.Select(
                                       x => {
                                           var newAcc = new Result();
                                           return new { result = x.Parse(data, newAcc), acc = newAcc };
                                       }
-                                  ).MinBy(x => x.result.Length);
-            acc.AddRange(result.acc);
-            return result.result;
+                                  ).Where(x => x.result.Item1 == State.Success).ToArray();
+
+            if(result.Length == 0) return Tuple.Create(State.Failure, data);
+            var longestMatch = result.MinBy(x => x.result.Item2.Length);
+            acc.AddRange(longestMatch.acc);
+            return longestMatch.result;
         }
     }
 

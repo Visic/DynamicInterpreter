@@ -1,5 +1,8 @@
-﻿--Consider adding negative matches (non-consuming, will just make the parser fail if the predicate matches)
---Consider adding inverse matches
---Consider adding range support (e.g. any lowercase char [a-z])
+﻿--Consider adding inverse matches
 --Add support for the empty string match ''
 --Evaluate the performance of the generated parsers and optimize if needed
+--Bug? I don't think the GrammarParser will behave reasonably with input like.. 'test' = 'something else' or -<anything> = <anything else>
+	-When I parse and assignment, I probably need to check the type of the token which is being assigned to (and make sure it's not a negative match)
+
+--Working on
+--Consider adding range support (e.g. any lowercase char [a-z])

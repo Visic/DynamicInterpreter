@@ -134,6 +134,18 @@ namespace Tests {
         }
 
         [Test]
+        public void NegativeMatch1() {
+            var result = GrammarParser.Parse(@"<b>=-'test'");
+            result.Match(
+                symbols => {
+                    Expect(symbols[0].Definition[0].Value, Is.EqualTo(@"-"));
+                    Expect(symbols[0].Definition[1].Value, Is.EqualTo(@"test"));
+                },
+                err => Expect(false, $"{err}") //this test should never err
+            );
+        }
+
+        [Test]
         public void SymbolIsEscapeChar() {
             var result = GrammarParser.Parse(@"<b>=<\\>");
             result.Match(

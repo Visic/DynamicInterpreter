@@ -9,6 +9,7 @@ namespace DynamicInterpreter {
         public enum Type {
             Symbol,
             Literal,
+            NegativeMatch,
             Bar
         }
 
@@ -47,6 +48,7 @@ namespace DynamicInterpreter {
         public static Union<SymbolDefinition[], string> Parse(string grammar) {
             if (!string.IsNullOrWhiteSpace(grammar)) {
                 var symbolDefs = new List<SymbolDefinition>();
+                var negativeMatch = false;
                 Token curSymbol = null; //the token we are working on defining
                 var tokens = new List<Token>();
 
@@ -68,12 +70,25 @@ namespace DynamicInterpreter {
                         case '|':
                             tokens.Add(new Token("|", Token.Type.Bar));
                             break;
+                        case '-':
+                            negativeMatch = true;
+                            break;
                         default:
-                            _tokenDelims.TryGetValue(ch).Apply(v => {
-                                var valAndRest = ParseToken(grammar, v.Item1);
-                                tokens.Add(new Token(valAndRest.Item1, v.Item2));
-                                grammar = valAndRest.Item2;
-                            });
+                            _tokenDelims.TryGetValue(ch).Match(
+                                some => {
+                                    if(negativeMatch) {
+                                        tokens.Add(new Token("-", Token.Type.NegativeMatch));
+                                        negativeMatch = false;
+                                    }
+
+                                    var valAndRest = ParseToken(grammar, some.Item1);
+                                    tokens.Add(new Token(valAndRest.Item1, some.Item2));
+                                    grammar = valAndRest.Item2;
+                                },
+                                none => {
+                                    negativeMatch = false;
+                                }
+                            );
                             break;
                     }
                     if (grammar.Length == initialLength) break; //no characters were handled, we're done

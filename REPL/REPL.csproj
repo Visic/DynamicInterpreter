@@ -77,7 +77,6 @@
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
   </ItemGroup>
-  <ItemGroup />
   <ItemGroup>
     <ProjectReference Include="..\DynamicInterpreter\DynamicInterpreter.csproj">
       <Project>{14009445-aec1-4f7e-b428-9bb070a33510}</Project>
