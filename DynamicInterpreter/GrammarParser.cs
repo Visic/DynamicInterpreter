@@ -34,7 +34,7 @@ namespace DynamicInterpreter {
 
     public static class GrammarParser {
         //<symbol name>=<symbol name>|'literal'|<>
-        //special characters -- <>|='
+        //special characters -<>|='
         //whitespace in <> or '' is part of that (symbol name/literal)
         //  all other whitespace is ignored so you can format your grammar however you'd like
 

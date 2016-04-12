@@ -30,6 +30,30 @@ namespace Tests {
         }
 
         [Test]
+        public void EmptyString() {
+            var grammar = $"<{Constants.EntryPointSymbolName}> = ''";
+            var codeToRun = "1";
+            var interp = new Interpreter();
+            var maybeErr = interp.Setup(grammar, new CombineToStringSymbolHandler(Constants.EntryPointSymbolName));
+            maybeErr.Apply(x => Expect(false, $"Unexpected error: {x}"));
+
+            var result = interp.Execute(codeToRun);
+            Expect(result[0], Is.EqualTo(""), "result was incorrect");
+        }
+
+        [Test, Description("Negating the empty string should always fail")]
+        public void NotEmptyString() {
+            var grammar = $"<{Constants.EntryPointSymbolName}> = -'''1'";
+            var codeToRun = "1";
+            var interp = new Interpreter();
+            var maybeErr = interp.Setup(grammar, new CombineToStringSymbolHandler(Constants.EntryPointSymbolName));
+            maybeErr.Apply(x => Expect(false, $"Unexpected error: {x}"));
+
+            var result = interp.Execute(codeToRun);
+            Expect(result, Is.Empty, "result was incorrect");
+        }
+
+        [Test]
         public void Recursion() {
             var grammar = $"<{Constants.EntryPointSymbolName}> = '1'|'1'<{Constants.EntryPointSymbolName}>";
             var codeToRun = "111";

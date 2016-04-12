@@ -155,5 +155,16 @@ namespace Tests {
                 err => Expect(false, $"{err}") //this test should never err
             );
         }
+
+        [Test]
+        public void EmptyString() {
+            var result = GrammarParser.Parse(@"<b>=''");
+            result.Match(
+                symbols => {
+                    Expect(symbols[0].Definition[0].Value, Is.EqualTo(@""));
+                },
+                err => Expect(false, $"{err}") //this test should never err
+            );
+        }
     }
 }
