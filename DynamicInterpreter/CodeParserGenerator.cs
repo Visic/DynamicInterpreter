@@ -20,42 +20,7 @@ namespace DynamicInterpreter {
 
         public SymbolParser(SymbolDefinition def, Dictionary<string, SymbolParser> symbolParsers) {
             _name = def.Name;
-            _parser = new Lazy<Parser>(
-                () => new AnyParser(
-                    def.Definition.Split(x => x.TokenType == Token.Type.Bar)
-                                  .Select(
-                                      x => {
-                                          var negativeMatch = false;
-                                          var parsers = new List<Parser>();
-                                          Methods.For(x, ele => {
-                                              var relevantParser = new Option<Parser>();
-                                              switch(ele.TokenType) {
-                                                  case Token.Type.Symbol:
-                                                      relevantParser = symbolParsers[ele.Value];
-                                                      break;
-                                                  case Token.Type.Literal:
-                                                      relevantParser = new LiteralParser(ele.Value);
-                                                      break;
-                                                  case Token.Type.NegativeMatch:
-                                                      negativeMatch = true;
-                                                      break;
-                                                  default:
-                                                      throw new Exception("Unknown token type");
-                                              }
-
-                                              relevantParser.Apply(p => {
-                                                  if(negativeMatch) {
-                                                      p = new NegativeMatchParser(p);
-                                                      negativeMatch = false;
-                                                  }
-                                                  parsers.Add(p);
-                                              });
-                                          });
-                                          return new InOrderParser(parsers.ToArray());
-                                      }
-                                  ).ToArray()
-                )
-            );
+            _parser = new Lazy<Parser>(() => MakeParser(def.Definition.ToList(), symbolParsers).Value);
         }
 
         public override Tuple<State, string> Parse(string data, Result acc) {
@@ -63,6 +28,55 @@ namespace DynamicInterpreter {
             var result = _parser.Value.Parse(data, newAcc);
             if (result.Item1 == State.Success) acc.Add(Tuple.Create(_name, newAcc));
             return result;
+        }
+
+        private Option<Parser> MakeParser(List<Token> def, Dictionary<string, SymbolParser> symbolParsers) {
+            var defParsers = new List<Parser>();
+            var curParsers = new List<Parser>();
+            var negativeMatch = false;
+
+            Action handleCurParsers = () => {
+                if(curParsers.Count > 1) defParsers.Add(new InOrderParser(curParsers.ToArray()));
+                else if(curParsers.Count == 1) defParsers.Add(curParsers[0]);
+                curParsers.Clear();
+            };
+
+            while(def.Count > 0) {
+                var token = def[0];
+                def.RemoveAt(0);
+
+                var relevantParser = new Option<Parser>();
+                switch(token.TokenType) {
+                    case Token.Type.CloseGroup:
+                    case Token.Type.Bar:
+                        handleCurParsers();
+                        break;
+                    case Token.Type.Symbol:
+                        relevantParser = symbolParsers[token.Value];
+                        break;
+                    case Token.Type.Literal:
+                        relevantParser = new LiteralParser(token.Value);
+                        break;
+                    case Token.Type.NegativeMatch:
+                        negativeMatch = true;
+                        break;
+                    case Token.Type.OpenGroup:
+                        relevantParser = MakeParser(def, symbolParsers);
+                        break;
+                    default:
+                        throw new Exception("Unknown token type");
+                }
+
+                relevantParser.Apply(p => {
+                    if(negativeMatch) {
+                        p = new NegativeMatchParser(p);
+                        negativeMatch = false;
+                    }
+                    curParsers.Add(p);
+                });
+            }
+            handleCurParsers();
+            return defParsers.Count > 1 ? new AnyParser(defParsers.ToArray()) : defParsers[0];
         }
     }
 

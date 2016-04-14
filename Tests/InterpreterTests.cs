@@ -30,6 +30,35 @@ namespace Tests {
         }
 
         [Test]
+        public void GroupingTest() {
+            var grammar = $"<{Constants.EntryPointSymbolName}> = '0'('1'|'2''3')";
+            var codeToRun = "0231";
+            var interp = new Interpreter();
+            var maybeErr = interp.Setup(grammar, new CombineToStringSymbolHandler(Constants.EntryPointSymbolName));
+            maybeErr.Apply(x => Expect(false, $"Unexpected error: {x}"));
+
+            var result = interp.Execute(codeToRun);
+            Expect(result[0], Is.EqualTo("023"), "result was incorrect");
+        }
+
+        [Test, Description("The result should not be a keyword, due to the negative match")]
+        public void KeywordTest() {
+            var grammar = $@"<char> = 'a'|'b'|'c'
+                             <allchars> = <char>|<char><allchars>
+                             <keywords> = 'cba'|'abc'
+                             <keyword> = <keywords> -<char>
+                             <name> = -<keyword><allchars>
+                             <{Constants.EntryPointSymbolName}> = <name>|<keyword>";
+            var codeToRun = "abca";
+            var interp = new Interpreter();
+            var maybeErr = interp.Setup(grammar, new CombineToStringSymbolHandler("keyword"));
+            maybeErr.Apply(x => Expect(false, $"Unexpected error: {x}"));
+
+            var result = interp.Execute(codeToRun);
+            Expect(result[0], Is.Not.EqualTo("abc"), "result was incorrect");
+        }
+
+        [Test]
         public void EmptyString() {
             var grammar = $"<{Constants.EntryPointSymbolName}> = ''";
             var codeToRun = "1";

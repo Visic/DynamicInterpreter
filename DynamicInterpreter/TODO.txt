@@ -1,6 +1,18 @@
-﻿--Evaluate the performance of the generated parsers and optimize if needed
+﻿--Consider adding macros (e.g. <+ <sym>> ::= <def> = <sym>|<sym><def>) **note "def" should only be in scope in the macro**
+	--Note:: It would be nice to expand these before parsing, that way it can go through the optimization phase
+	--Note 2:: It would be really nice to allow these macros to generate "consuming" and "non-consuming" rules
+--Consider adding "rules" or "tostring" to allow the parser to work on any data, not just strings
+--Consider trying to implement any convienience features by generating the parser for the description language, and then just add on there
+--Optimization
+	--Evaluate the performance of the generated parsers and optimize if needed
+	--Either memoize results so that repeated runs of the same parser on the same input become constant time operations
+			--and/or
+	--Reduce and optimize the grammar so there is little to no duplication of symbols (decision tree?)
+		--e.g  <a>='1''2'|'1''3' should be parsed as  '1' followed by any '2'|'3'
+	--Try to eliminate the need for recursion
+--Add generating assemblies from created parsers (so you can make one and just use it, this will lead into re-making the description language parser)
+
 --Bug? I don't think the GrammarParser will behave reasonably with input like.. 'test' = 'something else' or -<anything> = <anything else>
 	-When I parse and assignment, I probably need to check the type of the token which is being assigned to (and make sure it's not a negative match)
 
 --Working on
-

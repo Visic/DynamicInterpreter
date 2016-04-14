@@ -11,6 +11,6 @@ namespace DynamicInterpreter {
         }
 
         public string SymbolName { get; }
-        public List<object> Call(List<object> args) { return _call(args); }
+        public virtual List<object> Call(List<object> args) { return _call(args); }
     }
 }

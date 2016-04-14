@@ -10,7 +10,9 @@ namespace DynamicInterpreter {
             Symbol,
             Literal,
             NegativeMatch,
-            Bar
+            Bar,
+            OpenGroup,
+            CloseGroup
         }
 
         public Token(string value, Type tokenType) {
@@ -72,6 +74,12 @@ namespace DynamicInterpreter {
                             break;
                         case '-':
                             negativeMatch = true;
+                            break;
+                        case '(':
+                            tokens.Add(new Token("(", Token.Type.OpenGroup));
+                            break;
+                        case ')':
+                            tokens.Add(new Token(")", Token.Type.CloseGroup));
                             break;
                         default:
                             _tokenDelims.TryGetValue(ch).Match(

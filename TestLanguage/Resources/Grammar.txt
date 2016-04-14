@@ -2,11 +2,25 @@
 <lowercase> = 'a'|'b'|'c'|'d'|'e'|'f'|'g'|'h'|'i'|'j'|'k'|'l'|'m'|'n'|'o'|'p'|'q'|'r'|'s'|'t'|'u'|'v'|'w'|'x'|'y'|'z'
 <digits> = '0'|'1'|'2'|'3'|'4'|'5'|'6'|'7'|'8'|'9'
 <whitespace> = ' '|'\t'|'\r\n'|'\n'
+<specialchars> = '!'|'#'|'$'|'%'|'&'|'\''|'('|')'|'*'|'+'|','|'.'|'/'|':'|';'|'<'|'>'|'?'|'@'|'['|']'|'^'|'_'|'`'|'{'|'|'|'}'|'~'|'\\'|'"'|'='|'-'
 
 <any_whitespace> = <whitespace>|<whitespace><any_whitespace>
 <ignore_whitespace> = <any_whitespace>
 <integer> = <digits>|<digits><integer>
 
+Misc
+<chars> = <uppercase>|<lowercase>|<whitespace>|<digits>|<specialchars>
+<chars_notstarslash> = -'*/'<chars>
+<allchars_notStarSlash> = <chars_notstarslash>|<chars_notstarslash><allchars_notStarSlash>
+<blockcomment> = '/*'<allchars_notStarSlash>'*/'
+
+<keywords> = 'func'|'test'
+<keyword> = <keywords>-<chars_notwhitespace>
+
+<chars_notwhitespace> = -<whitespace>-<specialchars><chars>
+<allchars_notwhitespace> = <chars_notwhitespace>(''|<allchars_notwhitespace>)
+<funcname> = -<keyword><allchars_notwhitespace>
+
 Operators
-<add> = <integer>'+'<integer>|<integer>'+'<ignore_whitespace><integer>|<integer><ignore_whitespace>'+'<integer>|<integer><ignore_whitespace>'+'<ignore_whitespace><integer>
-<EntryPoint> = <add>
+<add> = <integer>(''|<ignore_whitespace)'+'(''|<ignore_whitespace)<integer>
+<EntryPoint> = <add>|<blockcomment>|<funcname>|<keyword>
