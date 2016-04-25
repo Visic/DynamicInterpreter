@@ -22,5 +22,5 @@ Misc
 <funcname> = -<keyword><allchars_notwhitespace>
 
 Operators
-<add> = <integer>(''|<ignore_whitespace)'+'(''|<ignore_whitespace)<integer>
+<add> = <integer>(''|<ignore_whitespace>)'+'(''|<ignore_whitespace>)<integer>
 <EntryPoint> = <add>|<blockcomment>|<funcname>|<keyword>

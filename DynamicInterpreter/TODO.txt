@@ -1,7 +1,4 @@
-﻿--Consider adding macros (e.g. <+ <sym>> ::= <def> = <sym>|<sym><def>) **note "def" should only be in scope in the macro**
-	--Note:: It would be nice to expand these before parsing, that way it can go through the optimization phase
-	--Note 2:: It would be really nice to allow these macros to generate "consuming" and "non-consuming" rules
---Consider adding "rules" or "tostring" to allow the parser to work on any data, not just strings
+﻿--Consider adding "rules" or "tostring" to allow the parser to work on any data, not just strings
 --Consider trying to implement any convienience features by generating the parser for the description language, and then just add on there
 --Optimization
 	--Evaluate the performance of the generated parsers and optimize if needed
@@ -16,3 +13,4 @@
 	-When I parse and assignment, I probably need to check the type of the token which is being assigned to (and make sure it's not a negative match)
 
 --Working on
+

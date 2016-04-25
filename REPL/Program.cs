@@ -24,7 +24,7 @@ namespace REPL {
             while(true) { //handle switching prompts
                 Prompt(Constants.ReplPromptName, x => { _commandInterp.Execute(x); }, _cmdBuffer);
                 Prompt(LanguageName, x => {
-                    if(_languageInterp != null) BetterConsole.WriteOnNextLine($"({string.Join(", ", _languageInterp.Execute(x).ToArray())})");
+                    if(_languageInterp != null) BetterConsole.WriteOnNextLine($"({_languageInterp.Execute(x).Match<string>(y => string.Join(", ", y.ToArray()), y => y)})");
                     else BetterConsole.WriteOnNextLine("Language not loaded. Use REPL Command {Language} to load a language assembly.");
                 }, _langBuffer);
             }

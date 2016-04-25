@@ -26,7 +26,7 @@ namespace Tests {
             maybeErr.Apply(x => Expect(false, $"Unexpected error: {x}"));
 
             var result = interp.Execute(codeToRun);
-            Expect(result[0], Is.EqualTo(1), "result was incorrect");
+            Expect(result.Match<object>(x => x[0], x => x), Is.EqualTo(1), "result was incorrect");
         }
 
         [Test]
@@ -38,7 +38,7 @@ namespace Tests {
             maybeErr.Apply(x => Expect(false, $"Unexpected error: {x}"));
 
             var result = interp.Execute(codeToRun);
-            Expect(result[0], Is.EqualTo("023"), "result was incorrect");
+            Expect(result.Match<object>(x => x[0], x => x), Is.EqualTo("023"), "result was incorrect");
         }
 
         [Test, Description("The result should not be a keyword, due to the negative match")]
@@ -55,7 +55,7 @@ namespace Tests {
             maybeErr.Apply(x => Expect(false, $"Unexpected error: {x}"));
 
             var result = interp.Execute(codeToRun);
-            Expect(result[0], Is.Not.EqualTo("abc"), "result was incorrect");
+            Expect(result.Match<object>(x => x[0], x => x), Is.Not.EqualTo("abc"), "result was incorrect");
         }
 
         [Test]
@@ -67,7 +67,7 @@ namespace Tests {
             maybeErr.Apply(x => Expect(false, $"Unexpected error: {x}"));
 
             var result = interp.Execute(codeToRun);
-            Expect(result[0], Is.EqualTo(""), "result was incorrect");
+            Expect(result.Match<object>(x => x[0], x => x), Is.EqualTo(""), "result was incorrect");
         }
 
         [Test, Description("Negating the empty string should always fail")]
@@ -79,7 +79,7 @@ namespace Tests {
             maybeErr.Apply(x => Expect(false, $"Unexpected error: {x}"));
 
             var result = interp.Execute(codeToRun);
-            Expect(result, Is.Empty, "result was incorrect");
+            result.Match(x => Expect(false, "Negating the empty string should always fail"), x => x);
         }
 
         [Test]
@@ -92,7 +92,7 @@ namespace Tests {
             maybeErr.Apply(x => Expect(false, $"Unexpected error: {x}"));
 
             var result = interp.Execute(codeToRun);
-            Expect(result[0], Is.EqualTo(111), "result was incorrect");
+            Expect(result.Match<object>(x => x[0], x => x), Is.EqualTo(111), "result was incorrect");
         }
 
         [Test]
@@ -107,7 +107,7 @@ namespace Tests {
             maybeErr.Apply(x => Expect(false, $"Unexpected error: {x}"));
 
             var result = interp.Execute(codeToRun);
-            Expect(result[0], Is.EqualTo("12121"), "result was incorrect");
+            Expect(result.Match<object>(x => x[0], x => x), Is.EqualTo("12121"), "result was incorrect");
         }
 
         [Test]
@@ -125,7 +125,7 @@ namespace Tests {
             maybeErr.Apply(x => Expect(false, $"Unexpected error: {x}"));
 
             var result = interp.Execute(codeToRun);
-            Expect(result[0], Is.EqualTo(15), "Incorrect result");
+            Expect(result.Match<object>(x => x[0], x => x), Is.EqualTo(15), "Incorrect result");
         }
 
         [Test]
@@ -143,7 +143,7 @@ namespace Tests {
             maybeErr.Apply(x => Expect(false, $"Unexpected error: {x}"));
 
             var result = interp.Execute(codeToRun);
-            Expect(result.ToDelimitedString(""), Is.EqualTo(codeToRun));
+            Expect(result.Match<object>(x => x.ToDelimitedString(""), x => x), Is.EqualTo(codeToRun));
         }
     }
 }

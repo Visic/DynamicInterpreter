@@ -20,9 +20,10 @@ namespace DynamicInterpreter {
             );
         }
 
-        public List<object> Execute(string code) {
+        public Union<List<object>, string> Execute(string code) {
             var parserResult = new Parser.Result();
-            _parsers[Constants.EntryPointSymbolName].Parse(code, parserResult);
+            var result = _parsers[Constants.EntryPointSymbolName].Parse(code, parserResult);
+            if(result.Item1 == Parser.State.Failure) return "Parse error";
             //_leftOverCode = _parsers[Constants.EntryPointSymbolName].Parse(_leftOverCode + code, parserResult);
             return RecursiveEval(parserResult);
         }
