@@ -33,7 +33,7 @@ namespace DynamicInterpreter {
         private Option<Parser> MakeParser(List<Token> def, Dictionary<string, SymbolParser> symbolParsers) {
             var defParsers = new List<Parser>();
             var curParsers = new List<Parser>();
-            var negativeMatch = false;
+            var negativeMatch = 0;
 
             Action handleCurParsers = () => {
                 if(curParsers.Count > 1) defParsers.Add(new InOrderParser(curParsers.ToArray()));
@@ -41,13 +41,16 @@ namespace DynamicInterpreter {
                 curParsers.Clear();
             };
 
-            while(def.Count > 0) {
+            bool ret = false;
+            while(def.Count > 0 && !ret) {
                 var token = def[0];
                 def.RemoveAt(0);
 
                 var relevantParser = new Option<Parser>();
                 switch(token.TokenType) {
                     case Token.Type.CloseGroup:
+                        ret = true;
+                        break;
                     case Token.Type.Bar:
                         handleCurParsers();
                         break;
@@ -58,7 +61,7 @@ namespace DynamicInterpreter {
                         relevantParser = new LiteralParser(token.Value);
                         break;
                     case Token.Type.NegativeMatch:
-                        negativeMatch = true;
+                        negativeMatch++;
                         break;
                     case Token.Type.OpenGroup:
                         relevantParser = MakeParser(def, symbolParsers);
@@ -68,10 +71,10 @@ namespace DynamicInterpreter {
                 }
 
                 relevantParser.Apply(p => {
-                    if(negativeMatch) {
+                    for(; negativeMatch > 0; --negativeMatch) {
                         p = new NegativeMatchParser(p);
-                        negativeMatch = false;
                     }
+
                     curParsers.Add(p);
                 });
             }

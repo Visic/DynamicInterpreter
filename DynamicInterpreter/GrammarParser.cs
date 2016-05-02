@@ -73,9 +73,17 @@ namespace DynamicInterpreter {
                             tokens.Add(new Token("|", Token.Type.Bar));
                             break;
                         case '-':
-                            negativeMatch = true;
+                            if(negativeMatch) {
+                                tokens.Add(new Token("-", Token.Type.NegativeMatch));
+                            }
+                                negativeMatch = true;
                             break;
                         case '(':
+                            if(negativeMatch) {
+                                tokens.Add(new Token("-", Token.Type.NegativeMatch));
+                                negativeMatch = false;
+                            }
+
                             tokens.Add(new Token("(", Token.Type.OpenGroup));
                             break;
                         case ')':

@@ -67,9 +67,9 @@ namespace ParserGenerator.Properties {
         ///&lt;whitespace&gt; = &apos; &apos;|&apos;\t&apos;|&apos;\r\n&apos;|&apos;\n&apos;
         ///&lt;specia....
         /// </summary>
-        internal static string DescriptionLanguageGrammar {
+        internal static string Grammar {
             get {
-                return ResourceManager.GetString("DescriptionLanguageGrammar", resourceCulture);
+                return ResourceManager.GetString("Grammar", resourceCulture);
             }
         }
     }

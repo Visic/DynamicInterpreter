@@ -91,6 +91,7 @@ namespace Tests {
             );
         }
 
+        [TestCase(@"<a> = '\''", "'")]
         [TestCase(@"<a> = '\'1'", "'1")]
         [TestCase(@"<a> = '\'1\''", "'1'")]
         [TestCase(@"<a> = '\'1\'\''", "'1''")]

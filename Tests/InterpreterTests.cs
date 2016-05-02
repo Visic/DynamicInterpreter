@@ -58,6 +58,32 @@ namespace Tests {
             Expect(result.Match<object>(x => x[0], x => x), Is.Not.EqualTo("abc"), "result was incorrect");
         }
 
+        [Test, Description("Inverting a negative match should result in success with no characters consumed")]
+        public void DoubleNegative() {
+            var grammar = $"<EntryPoint> = -(-'1')'1'";
+            var codeToRun = "11";
+            var interp = new Interpreter();
+            var maybeErr = interp.Setup(grammar, new CombineToStringSymbolHandler(Constants.EntryPointSymbolName));
+            maybeErr.Apply(x => Expect(false, $"Unexpected error: {x}"));
+
+            var result = interp.Execute(codeToRun);
+            Expect(result.Match<object>(x => x[0], x => x), Is.EqualTo("1"), "result was incorrect");
+        }
+
+        [TestCase(@"\\\'", @"\'")]
+        [TestCase(@"\'", @"'")]
+        public void EscapeMatches(string arg1, string arg2) {
+            var grammar = $@"<escaped> = '\\'-'\\'|'\\\\'<escaped>
+                             <EntryPoint> = -(-<escaped>'\'')'{arg1}'";
+            var codeToRun = arg2;
+            var interp = new Interpreter();
+            var maybeErr = interp.Setup(grammar, new CombineToStringSymbolHandler(Constants.EntryPointSymbolName));
+            maybeErr.Apply(x => Expect(false, $"Unexpected error: {x}"));
+
+            var result = interp.Execute(codeToRun);
+            Expect(result.Match<object>(x => x[0], x => x), Is.EqualTo(arg2), "result was incorrect");
+        }
+
         [Test]
         public void EmptyString() {
             var grammar = $"<{Constants.EntryPointSymbolName}> = ''";

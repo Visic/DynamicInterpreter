@@ -18,6 +18,8 @@ namespace REPL {
         static List<string> _langBuffer = new List<string>();
 
         public static void Main(string[] args) {
+            Console.Clear();
+
             var commandHandler = new GenericSymbolHandler("command", CallREPLCommand);
             _commandInterp.Setup(Resources.REPLCommandGrammar, new CombineToStringSymbolHandler("arg"), new CombineToStringSymbolHandler("cmdname"), commandHandler);
 
