@@ -50,7 +50,17 @@ namespace REPL {
             });
 
             var interp = new Interpreter();
-            interp.Setup(Resources.CommandlineGrammar, entryHandler, argHandler, argNameHandler, argNameValueSeperatorHandler, argValueHandler, whitespaceHandler, ignoreUpToFirstArgHandler);
+            interp.Setup(
+                Parser.GenerateParser(Resources.CommandlineGrammar).Match(x => x, x => { }).Value, //safe to ignore errors unless I decide to change the commandline parser definition
+                entryHandler,
+                argHandler,
+                argNameHandler,
+                argNameValueSeperatorHandler,
+                argValueHandler,
+                whitespaceHandler,
+                ignoreUpToFirstArgHandler
+            );
+            //interp.Setup(Resources.CommandlineGrammar, entryHandler, argHandler, argNameHandler, argNameValueSeperatorHandler, argValueHandler, whitespaceHandler, ignoreUpToFirstArgHandler);
             interp.Execute(Environment.CommandLine);
         }
     }

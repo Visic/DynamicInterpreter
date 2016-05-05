@@ -23,7 +23,7 @@ namespace ParserGenerator {
         public string SymbolName { get; } = "symbol";
 
         public List<object> Call(List<object> args) {
-            return new List<object>() { ParserCodeGenerator.Symbol((string)args[1]) };
+            return new List<object> { ParserCodeGenerator.Symbol((string)args[1]) };
         }
     }
 
@@ -32,7 +32,7 @@ namespace ParserGenerator {
 
         public List<object> Call(List<object> args) {
             if(args.Count == 1) return args;
-            return new List<object>() { ParserCodeGenerator.InOrder(args.Cast<string>()) };
+            return new List<object> { ParserCodeGenerator.InOrder(args.Cast<string>()) };
         }
     }
 
@@ -41,7 +41,7 @@ namespace ParserGenerator {
 
         public List<object> Call(List<object> args) {
             if(args.Count == 1) return args;
-            return new List<object>() { ParserCodeGenerator.Any(args.Where(x => (string)x != "|").Cast<string>()) };
+            return new List<object> { ParserCodeGenerator.Any(args.Where(x => (string)x != "|").Cast<string>()) };
         }
     }
 
@@ -49,7 +49,7 @@ namespace ParserGenerator {
         public string SymbolName { get; } = "negation";
 
         public List<object> Call(List<object> args) {
-            return new List<object>() { ParserCodeGenerator.Negate((string)args[1]) };
+            return new List<object> { ParserCodeGenerator.Negate((string)args[1]) };
         }
     }
 
@@ -57,7 +57,7 @@ namespace ParserGenerator {
         public string SymbolName { get; } = "assignment";
 
         public List<object> Call(List<object> args) {
-            return new List<object>() { ParserCodeGenerator.Assignment((string)args[1], (string)args[4]) };
+            return new List<object> { ParserCodeGenerator.Assignment((string)args[1], (string)args[4]) };
         }
     }
 
@@ -65,9 +65,8 @@ namespace ParserGenerator {
         public string SymbolName { get; } = "EntryPoint";
 
         public List<object> Call(List<object> args) {
-            File.WriteAllText("parser.cs", ParserCodeGenerator.EntryPoint(args.Cast<string>()));
+            File.WriteAllText("Parser.cs", ParserCodeGenerator.EntryPoint(args.Cast<string>()));
             return new List<object>();
-            //return new List<object>() { ParserCodeGenerator.EntryPoint(args.Cast<string>()) };
         }
     }
 
@@ -75,7 +74,7 @@ namespace ParserGenerator {
         public string SymbolName { get; } = "group";
 
         public List<object> Call(List<object> args) {
-            return new List<object>() { args[1] }; //just return the "any" parser
+            return new List<object> { args[1] }; //just return the "any" parser
         }
     }
 

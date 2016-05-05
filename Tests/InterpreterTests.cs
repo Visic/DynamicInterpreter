@@ -22,7 +22,7 @@ namespace Tests {
             var codeToRun = "1";
             var addHandler = Handler.Create(Constants.EntryPointSymbolName, args => int.Parse(args.ToDelimitedString("")));
             var interp = new Interpreter();
-            var maybeErr = interp.Setup(grammar, addHandler);
+            var maybeErr = Parser.GenerateParser(grammar).Match(x => interp.Setup(x, addHandler), x => x);
             maybeErr.Apply(x => Expect(false, $"Unexpected error: {x}"));
 
             var result = interp.Execute(codeToRun);
@@ -34,7 +34,10 @@ namespace Tests {
             var grammar = $"<{Constants.EntryPointSymbolName}> = '0'('1'|'2''3')";
             var codeToRun = "0231";
             var interp = new Interpreter();
-            var maybeErr = interp.Setup(grammar, new CombineToStringSymbolHandler(Constants.EntryPointSymbolName));
+            var maybeErr = Parser.GenerateParser(grammar).Match(
+                x => interp.Setup(x, new CombineToStringSymbolHandler(Constants.EntryPointSymbolName)), 
+                x => x
+            );
             maybeErr.Apply(x => Expect(false, $"Unexpected error: {x}"));
 
             var result = interp.Execute(codeToRun);
@@ -51,7 +54,7 @@ namespace Tests {
                              <{Constants.EntryPointSymbolName}> = <name>|<keyword>";
             var codeToRun = "abca";
             var interp = new Interpreter();
-            var maybeErr = interp.Setup(grammar, new CombineToStringSymbolHandler("keyword"));
+            var maybeErr = Parser.GenerateParser(grammar).Match(x => interp.Setup(x, new CombineToStringSymbolHandler("keyword")), x => x);
             maybeErr.Apply(x => Expect(false, $"Unexpected error: {x}"));
 
             var result = interp.Execute(codeToRun);
@@ -63,13 +66,14 @@ namespace Tests {
             var grammar = $"<EntryPoint> = -(-'1')'1'";
             var codeToRun = "11";
             var interp = new Interpreter();
-            var maybeErr = interp.Setup(grammar, new CombineToStringSymbolHandler(Constants.EntryPointSymbolName));
+            var maybeErr = Parser.GenerateParser(grammar).Match(x => interp.Setup(x, new CombineToStringSymbolHandler(Constants.EntryPointSymbolName)), x => x);
             maybeErr.Apply(x => Expect(false, $"Unexpected error: {x}"));
 
             var result = interp.Execute(codeToRun);
             Expect(result.Match<object>(x => x[0], x => x), Is.EqualTo("1"), "result was incorrect");
         }
 
+        //TODO:: There is some kind of mishandling with escape characters (good proof is running the repl to load a language, the c:\... '\' doesn't parse)
         [TestCase(@"\\\'", @"\'")]
         [TestCase(@"\'", @"'")]
         public void EscapeMatches(string arg1, string arg2) {
@@ -77,7 +81,7 @@ namespace Tests {
                              <EntryPoint> = -(-<escaped>'\'')'{arg1}'";
             var codeToRun = arg2;
             var interp = new Interpreter();
-            var maybeErr = interp.Setup(grammar, new CombineToStringSymbolHandler(Constants.EntryPointSymbolName));
+            var maybeErr = Parser.GenerateParser(grammar).Match(x => interp.Setup(x, new CombineToStringSymbolHandler(Constants.EntryPointSymbolName)), x => x);
             maybeErr.Apply(x => Expect(false, $"Unexpected error: {x}"));
 
             var result = interp.Execute(codeToRun);
@@ -89,7 +93,7 @@ namespace Tests {
             var grammar = $"<{Constants.EntryPointSymbolName}> = ''";
             var codeToRun = "1";
             var interp = new Interpreter();
-            var maybeErr = interp.Setup(grammar, new CombineToStringSymbolHandler(Constants.EntryPointSymbolName));
+            var maybeErr = Parser.GenerateParser(grammar).Match(x => interp.Setup(x, new CombineToStringSymbolHandler(Constants.EntryPointSymbolName)), x => x);
             maybeErr.Apply(x => Expect(false, $"Unexpected error: {x}"));
 
             var result = interp.Execute(codeToRun);
@@ -101,7 +105,7 @@ namespace Tests {
             var grammar = $"<{Constants.EntryPointSymbolName}> = -'''1'";
             var codeToRun = "1";
             var interp = new Interpreter();
-            var maybeErr = interp.Setup(grammar, new CombineToStringSymbolHandler(Constants.EntryPointSymbolName));
+            var maybeErr = Parser.GenerateParser(grammar).Match(x => interp.Setup(x, new CombineToStringSymbolHandler(Constants.EntryPointSymbolName)), x => x);
             maybeErr.Apply(x => Expect(false, $"Unexpected error: {x}"));
 
             var result = interp.Execute(codeToRun);
@@ -114,7 +118,7 @@ namespace Tests {
             var codeToRun = "111";
             var entryHandler = Handler.Create(Constants.EntryPointSymbolName, args => int.Parse(args.ToDelimitedString("")));
             var interp = new Interpreter();
-            var maybeErr = interp.Setup(grammar, entryHandler);
+            var maybeErr = Parser.GenerateParser(grammar).Match(x => interp.Setup(x, entryHandler), x => x);
             maybeErr.Apply(x => Expect(false, $"Unexpected error: {x}"));
 
             var result = interp.Execute(codeToRun);
@@ -129,7 +133,7 @@ namespace Tests {
             var entryHandler = Handler.Create(Constants.EntryPointSymbolName, args => args.ToDelimitedString(""));
             var aHandler = Handler.Create("a", args => args.ToDelimitedString(""));
             var interp = new Interpreter();
-            var maybeErr = interp.Setup(grammar, entryHandler, aHandler);
+            var maybeErr = Parser.GenerateParser(grammar).Match(x => interp.Setup(x, entryHandler, aHandler), x => x);
             maybeErr.Apply(x => Expect(false, $"Unexpected error: {x}"));
 
             var result = interp.Execute(codeToRun);
@@ -147,7 +151,7 @@ namespace Tests {
             var digitHandler = Handler.Create("digit", args => int.Parse(args.First().ToString()));
             var addHandler = Handler.Create("add", args => args.Select(x => x.ToString() == "+" ? 0 : (int)x).Sum());
             var interp = new Interpreter();
-            var maybeErr = interp.Setup(grammar, entryHandler, digitHandler, addHandler);
+            var maybeErr = Parser.GenerateParser(grammar).Match(x => interp.Setup(x, entryHandler, digitHandler, addHandler), x => x);
             maybeErr.Apply(x => Expect(false, $"Unexpected error: {x}"));
 
             var result = interp.Execute(codeToRun);
@@ -165,7 +169,7 @@ namespace Tests {
             var codeToRun = "123abc";
             var entryHandler = Handler.Create(Constants.EntryPointSymbolName, args => args);
             var interp = new Interpreter();
-            var maybeErr = interp.Setup(grammar, entryHandler);
+            var maybeErr = Parser.GenerateParser(grammar).Match(x => interp.Setup(x, entryHandler), x => x);
             maybeErr.Apply(x => Expect(false, $"Unexpected error: {x}"));
 
             var result = interp.Execute(codeToRun);
