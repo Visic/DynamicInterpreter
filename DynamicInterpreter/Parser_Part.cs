@@ -8,30 +8,32 @@ using Utility;
 namespace DynamicInterpreter {
     public static partial class Parser {
         static Interpreter _interpreter = new Interpreter();
-        static Dictionary<string, Parse> _assignedSymbols = new Dictionary<string, Parse>();
 
         static Parser() {
+            var assignedSymbols = new Dictionary<string, Parse>();
+
             _interpreter.Setup(
                 SymbolParsers["EntryPoint"],
 
                 //Handlers
                 new IgnoreSymbolHandler("ignore_all_whitespace"),
-                new GenericSymbolHandler("symbol", args => new List<object> { new Union<Parse, Func<Parse>>(FixType(() => _assignedSymbols[(string)args[1]])) }),
+                new GenericSymbolHandler("symbol", args => new List<object> { new Union<Parse, Func<Parse>>(FixType(() => assignedSymbols[(string)args[1]])) }),
                 new GenericSymbolHandler("negation", args => new List<object> { new Union<Parse, Func<Parse>>(Negate((Union<Parse, Func<Parse>>)args[1])) }),
                 new GenericSymbolHandler("group", args => new List<object> { (Union<Parse, Func<Parse>>)args[1] }),
-                new GenericSymbolHandler("EntryPoint", args => new List<object> { _assignedSymbols["EntryPoint"] }),
+                new GenericSymbolHandler("EntryPoint", args => new List<object> { assignedSymbols["EntryPoint"] }),
 
                 new GenericSymbolHandler("assignment", args => {
-                    _assignedSymbols[(string)args[1]] = Symbol((string)args[1], (Union<Parse, Func<Parse>>)args[4]);
+                    var str = ((string)args[1]).Replace("\\\\", "\\");
+                    assignedSymbols[str] = Symbol(str, (Union<Parse, Func<Parse>>)args[4]);
                     return new List<object>();
                 }),
 
                 new GenericSymbolHandler("allchars_not_gt", args => {
-                    return new List<object> { args.Cast<string>().ToDelimitedString("").Replace(@"\>", ">").Replace("\\\\", "\\") };
+                    return new List<object> { args.Cast<string>().ToDelimitedString("").Replace(@"\>", ">") };
                 }),
 
                 new GenericSymbolHandler("allchars_not_quote", args => {
-                    return new List<object> { args.Cast<string>().ToDelimitedString("").Replace(@"\'", "'").Replace("\\\\", "\\") };
+                    return new List<object> { args.Cast<string>().ToDelimitedString("").Replace(@"\'", "'") };
                 }),
 
                 new GenericSymbolHandler("all_inorder", args => {
@@ -45,14 +47,12 @@ namespace DynamicInterpreter {
                 }),
 
                 new GenericSymbolHandler("literal", args => {
-                    return new List<object> { new Union<Parse, Func<Parse>>(Literal((string)args[1])) };
+                    return new List<object> { new Union<Parse, Func<Parse>>(Literal(((string)args[1]).Replace("\\\\", "\\"))) };
                 })
             );
         }
 
         public static Union<Parse, string> GenerateParser(string description) {
-            _assignedSymbols.Clear();
-
             return _interpreter.Execute(description).Match(
                 x => (Parse)x[0],
                 x => x
