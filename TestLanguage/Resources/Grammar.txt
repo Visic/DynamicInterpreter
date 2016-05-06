@@ -8,7 +8,6 @@
 <ignore_whitespace> = <any_whitespace>
 <integer> = <digits>|<digits><integer>
 
-Misc
 <chars> = <uppercase>|<lowercase>|<whitespace>|<digits>|<specialchars>
 <chars_notstarslash> = -'*/'<chars>
 <allchars_notStarSlash> = <chars_notstarslash>|<chars_notstarslash><allchars_notStarSlash>
@@ -21,6 +20,5 @@ Misc
 <allchars_notwhitespace> = <chars_notwhitespace>(''|<allchars_notwhitespace>)
 <funcname> = -<keyword><allchars_notwhitespace>
 
-Operators
 <add> = <integer>(''|<ignore_whitespace>)'+'(''|<ignore_whitespace>)<integer>
 <EntryPoint> = <add>|<blockcomment>|<funcname>|<keyword>
