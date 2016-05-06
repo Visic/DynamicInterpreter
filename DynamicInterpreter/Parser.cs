@@ -1,59 +1,106 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Utility;
 
 namespace DynamicInterpreter {
     public static partial class Parser {
-        static Interpreter _interpreter = new Interpreter();
-        static Dictionary<string, Union<Parse, Func<Parse>>> _assignedSymbols = new Dictionary<string, Union<Parse, Func<Parse>>>();
+        public enum State { Success, Failure }
+        public class Result : List<Union<string, Tuple<string, Result>>> { }
+        public delegate Tuple<State, string> Parse(string data, Result acc);
 
-        static Parser() {
-            _interpreter.Setup(
-                Eval(SymbolParsers["EntryPoint"]),
+        public static IReadOnlyDictionary<string, Parse> SymbolParsers = new Dictionary<string, Parse>(){
+            {"uppercase", Symbol("uppercase", Any(Literal("A"), Literal("B"), Literal("C"), Literal("D"), Literal("E"), Literal("F"), Literal("G"), Literal("H"), Literal("I"), Literal("J"), Literal("K"), Literal("L"), Literal("M"), Literal("N"), Literal("O"), Literal("P"), Literal("Q"), Literal("R"), Literal("S"), Literal("T"), Literal("U"), Literal("V"), Literal("W"), Literal("X"), Literal("Y"), Literal("Z")))},
+			{"lowercase", Symbol("lowercase", Any(Literal("a"), Literal("b"), Literal("c"), Literal("d"), Literal("e"), Literal("f"), Literal("g"), Literal("h"), Literal("i"), Literal("j"), Literal("k"), Literal("l"), Literal("m"), Literal("n"), Literal("o"), Literal("p"), Literal("q"), Literal("r"), Literal("s"), Literal("t"), Literal("u"), Literal("v"), Literal("w"), Literal("x"), Literal("y"), Literal("z")))},
+			{"digits", Symbol("digits", Any(Literal("0"), Literal("1"), Literal("2"), Literal("3"), Literal("4"), Literal("5"), Literal("6"), Literal("7"), Literal("8"), Literal("9")))},
+			{"whitespace", Symbol("whitespace", Any(Literal(" "), Literal("\t"), Literal("\r\n"), Literal("\n")))},
+			{"specialchars", Symbol("specialchars", Any(Literal("!"), Literal("#"), Literal("$"), Literal("%"), Literal("&"), Literal("'"), Literal("("), Literal(")"), Literal("*"), Literal("+"), Literal(","), Literal("."), Literal("/"), Literal(":"), Literal(";"), Literal("<"), Literal(">"), Literal("?"), Literal("@"), Literal("["), Literal("]"), Literal("^"), Literal("_"), Literal("`"), Literal("{"), Literal("|"), Literal("}"), Literal("~"), Literal("\\"), Literal("\""), Literal("="), Literal("-")))},
+			{"escaped", Symbol("escaped", Any(InOrder(Literal("\\"), Negate(Literal("\\"))), InOrder(Literal("\\\\"), FixType(() => SymbolParsers["escaped"]))))},
+			{"all_escape_chars", Symbol("all_escape_chars", Any(Literal("\\"), InOrder(Literal("\\"), FixType(() => SymbolParsers["all_escape_chars"]))))},
+			{"almost_all_escape_chars", Symbol("almost_all_escape_chars", Any(InOrder(Literal("\\"), Negate(Negate(Literal("\\")))), InOrder(Literal("\\"), FixType(() => SymbolParsers["almost_all_escape_chars"]))))},
+			{"anychar", Symbol("anychar", Any(FixType(() => SymbolParsers["uppercase"]), FixType(() => SymbolParsers["lowercase"]), FixType(() => SymbolParsers["digits"]), FixType(() => SymbolParsers["whitespace"]), FixType(() => SymbolParsers["specialchars"])))},
+			{"all_whitespace", Symbol("all_whitespace", Any(FixType(() => SymbolParsers["whitespace"]), InOrder(FixType(() => SymbolParsers["whitespace"]), FixType(() => SymbolParsers["all_whitespace"]))))},
+			{"ignore_all_whitespace", Symbol("ignore_all_whitespace", Any(Literal(""), FixType(() => SymbolParsers["all_whitespace"])))},
+			{"allchars_not_quote", Symbol("allchars_not_quote", InOrder(Negate(Any(Literal("'"), InOrder(FixType(() => SymbolParsers["escaped"]), FixType(() => SymbolParsers["almost_all_escape_chars"]), Literal("\\'")))), Any(InOrder(Negate(Negate(FixType(() => SymbolParsers["escaped"]))), FixType(() => SymbolParsers["all_escape_chars"]), FixType(() => SymbolParsers["anychar"])), InOrder(Negate(FixType(() => SymbolParsers["escaped"])), FixType(() => SymbolParsers["all_escape_chars"])), FixType(() => SymbolParsers["anychar"])), Any(Literal(""), FixType(() => SymbolParsers["allchars_not_quote"]))))},
+			{"literal", Symbol("literal", InOrder(Literal("'"), Any(Literal(""), FixType(() => SymbolParsers["allchars_not_quote"])), Literal("'")))},
+			{"allchars_not_gt", Symbol("allchars_not_gt", InOrder(Negate(Any(Literal(">"), InOrder(FixType(() => SymbolParsers["escaped"]), FixType(() => SymbolParsers["almost_all_escape_chars"]), Literal("\\>")))), Any(InOrder(Negate(Negate(FixType(() => SymbolParsers["escaped"]))), FixType(() => SymbolParsers["all_escape_chars"]), FixType(() => SymbolParsers["anychar"])), InOrder(Negate(FixType(() => SymbolParsers["escaped"])), FixType(() => SymbolParsers["all_escape_chars"])), FixType(() => SymbolParsers["anychar"])), Any(Literal(""), FixType(() => SymbolParsers["allchars_not_gt"]))))},
+			{"symbol", Symbol("symbol", InOrder(Literal("<"), FixType(() => SymbolParsers["allchars_not_gt"]), Literal(">")))},
+			{"inorder_ele", Symbol("inorder_ele", InOrder(FixType(() => SymbolParsers["ignore_all_whitespace"]), Any(InOrder(FixType(() => SymbolParsers["symbol"]), FixType(() => SymbolParsers["ignore_all_whitespace"]), Negate(Literal("="))), FixType(() => SymbolParsers["literal"]), FixType(() => SymbolParsers["group"]), FixType(() => SymbolParsers["negation"]))))},
+			{"inorder", Symbol("inorder", Any(FixType(() => SymbolParsers["inorder_ele"]), InOrder(FixType(() => SymbolParsers["inorder_ele"]), FixType(() => SymbolParsers["inorder"]))))},
+			{"all_inorder", Symbol("all_inorder", FixType(() => SymbolParsers["inorder"]))},
+			{"any", Symbol("any", Any(FixType(() => SymbolParsers["all_inorder"]), InOrder(FixType(() => SymbolParsers["all_inorder"]), Literal("|"), FixType(() => SymbolParsers["any"]))))},
+			{"all_any", Symbol("all_any", FixType(() => SymbolParsers["any"]))},
+			{"group", Symbol("group", InOrder(Literal("("), FixType(() => SymbolParsers["all_any"]), FixType(() => SymbolParsers["ignore_all_whitespace"]), Literal(")")))},
+			{"negation", Symbol("negation", InOrder(Literal("-"), Any(FixType(() => SymbolParsers["group"]), FixType(() => SymbolParsers["symbol"]), FixType(() => SymbolParsers["literal"]), FixType(() => SymbolParsers["negation"]))))},
+			{"assignment", Symbol("assignment", InOrder(FixType(() => SymbolParsers["ignore_all_whitespace"]), Literal("<"), FixType(() => SymbolParsers["allchars_not_gt"]), Literal(">"), FixType(() => SymbolParsers["ignore_all_whitespace"]), Literal("="), FixType(() => SymbolParsers["all_any"]), FixType(() => SymbolParsers["ignore_all_whitespace"])))},
+			{"all_assignments", Symbol("all_assignments", Any(FixType(() => SymbolParsers["assignment"]), InOrder(FixType(() => SymbolParsers["assignment"]), FixType(() => SymbolParsers["all_assignments"]))))},
+			{"EntryPoint", Symbol("EntryPoint", FixType(() => SymbolParsers["all_assignments"]))}
+        };
 
-                //Handlers
-                new IgnoreSymbolHandler("ignore_all_whitespace"),
-                new CombineToStringSymbolHandler("allchars_not_gt"),
-                new CombineToStringSymbolHandler("allchars_not_quote"),
-                new GenericSymbolHandler("symbol", args => new List<object> { new Union<Parse, Func<Parse>>(FixType(() => Eval(_assignedSymbols[(string)args[1]]))) }),
-                new GenericSymbolHandler("negation", args => new List<object> { new Union<Parse, Func<Parse>>(Negate((Union<Parse, Func<Parse>>)args[1])) }),
-                new GenericSymbolHandler("group", args => new List<object> { (Union<Parse, Func<Parse>>)args[1] }),
-                new GenericSymbolHandler("EntryPoint", args => new List<object> { _assignedSymbols["EntryPoint"] }),
-
-                new GenericSymbolHandler("assignment", args => {
-                    _assignedSymbols[(string)args[1]] = Symbol((string)args[1], (Union<Parse, Func<Parse>>)args[4]);
-                    return new List<object>();
-                }),
-
-                new GenericSymbolHandler("all_inorder", args => {
-                    if(args.Count == 1) return args;
-                    return new List<object> { new Union<Parse, Func<Parse>>(InOrder(args.Cast<Union<Parse, Func<Parse>>>().ToArray())) };
-                }),
-
-                new GenericSymbolHandler("all_any", args => {
-                    if(args.Count == 1) return args;
-                    return new List<object> { new Union<Parse, Func<Parse>>(Any(args.Where(x => !(x is string)).Cast<Union<Parse, Func<Parse>>>().ToArray())) }; //just use the parsers, ignore the '|' strings
-                }),
-
-                new GenericSymbolHandler("literal", args => {
-                    var str = (string)args[1];
-                    str = str.Replace(@"\'", "'");
-                    str = str.Replace("\"", "\\\"");
-                    return new List<object> { new Union<Parse, Func<Parse>>(Literal(str)) };
-                })
-            );
+        private static Parse Symbol(string symbolName, Union<Parse, Func<Parse>> parser) {
+            return (data, acc) => {
+                var newAcc = new Result();
+                var result = Eval(parser)(data, newAcc);
+                if (result.Item1 == State.Success) acc.Add(Tuple.Create(symbolName, newAcc));
+                return result;
+            };
         }
 
-        public static Union<Parse, string> GenerateParser(string description) {
-            _assignedSymbols.Clear();
+        private static Parse Literal(string value) {
+            return (data, acc) => {
+                if(data.StartsWith(value)) {
+                    acc.Add(value);
+                    return Tuple.Create(State.Success, data.Remove(0, value.Length));
+                }
+                return Tuple.Create(State.Failure, data);
+            };
+        }
 
-            return _interpreter.Execute(description).Match(
-                x => Eval((Union<Parse, Func<Parse>>)x[0]),
-                x => x
-            );
+        private static Parse Negate(Union<Parse, Func<Parse>> parserToNegate) {
+            return (data, acc) => {
+                var newAcc = new Result();
+                var result = Eval(parserToNegate)(data, newAcc);
+                if(result.Item1 == State.Success) return Tuple.Create(State.Failure, data);
+                return Tuple.Create(State.Success, data);
+            };
+        }
+
+        private static Parse InOrder(params Union<Parse, Func<Parse>>[] parsers) {
+            return (data, acc) => {
+                var newAcc = new Result();
+                var result = data;
+                foreach (var parser in parsers) {
+                    var partialResult = Eval(parser)(result, newAcc);
+                    if (partialResult.Item1 == State.Failure) return Tuple.Create(State.Failure, data);
+                    result = partialResult.Item2;
+                }
+                acc.AddRange(newAcc);
+                return Tuple.Create(State.Success, result);
+            };
+        }
+
+        private static Parse Any(params Union<Parse, Func<Parse>>[] parsers) {
+            return (data, acc) => {
+                var result = parsers.Select(
+                    x => {
+                        var newAcc = new Result();
+                        return new { result = Eval(x)(data, newAcc), acc = newAcc };
+                    }
+                ).Where(x => x.result.Item1 == State.Success).ToArray();
+
+                if(result.Length == 0) return Tuple.Create(State.Failure, data);
+                var longestMatch = result.MinBy(x => x.result.Item2.Length);
+                acc.AddRange(longestMatch.acc);
+                return longestMatch.result;
+            };
+        }
+
+        private static Parse Eval(Union<Parse, Func<Parse>> val) {
+            return val.Match<Parse>(x => x, x => x());
+        }
+
+        private static Func<Parse> FixType(Func<Parse> parse) {
+            return parse;
         }
     }
 }

@@ -55,6 +55,15 @@
     <Compile Include="SymbolHandlers.cs" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\DescriptionLanguageGrammar.txt" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\DynamicInterpreter\DynamicInterpreter.csproj">
       <Project>{14009445-aec1-4f7e-b428-9bb070a33510}</Project>
       <Name>DynamicInterpreter</Name>
@@ -63,15 +72,6 @@
       <Project>{1e195ee0-4b83-4856-8cbd-c6431577e345}</Project>
       <Name>REPL</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Properties\Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\DescriptionLanguageGrammar.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

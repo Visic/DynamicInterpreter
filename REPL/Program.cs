@@ -23,11 +23,10 @@ namespace REPL {
             var commandHandler = new GenericSymbolHandler("command", CallREPLCommand);
             _commandInterp.Setup(
                 Parser.GenerateParser(Resources.REPLCommandGrammar).Match(x => x, x => { }).Value, //safe to ignore errors unless I decide to change the repl command parser definition
-                new CombineToStringSymbolHandler("arg"), 
-                new CombineToStringSymbolHandler("cmdname"), 
+                new CombineToStringSymbolHandler("arg"),
+                new CombineToStringSymbolHandler("cmdname"),
                 commandHandler
             );
-            //_commandInterp.Setup(Resources.REPLCommandGrammar, new CombineToStringSymbolHandler("arg"), new CombineToStringSymbolHandler("cmdname"), commandHandler);
 
             while(true) { //handle switching prompts
                 Prompt(Constants.ReplPromptName, x => { _commandInterp.Execute(x); }, _cmdBuffer);

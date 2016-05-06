@@ -5,17 +5,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using DynamicInterpreter;
+using Utility;
 
 namespace ParserGenerator {
     public class LiteralHandler : ISymbolHandler {
         public string SymbolName { get; } = "literal";
 
         public List<object> Call(List<object> args) {
-            var str = (string)args[1];
-            str = str.Replace(@"\'", "'");
-            str = str.Replace("\"", "\\\"");
-
-            return new List<object> { ParserCodeGenerator.Literal(str) };
+            return new List<object> { ParserCodeGenerator.Literal(((string)args[1]).Replace("\"", "\\\"")) };
         }
     }
 
@@ -23,7 +20,7 @@ namespace ParserGenerator {
         public string SymbolName { get; } = "symbol";
 
         public List<object> Call(List<object> args) {
-            return new List<object> { ParserCodeGenerator.Symbol((string)args[1]) };
+            return new List<object> { ParserCodeGenerator.Symbol(((string)args[1]).Replace("\"", "\\\"")) };
         }
     }
 
@@ -82,11 +79,19 @@ namespace ParserGenerator {
         public IgnoreWhitespaceHandler() : base("ignore_all_whitespace") { }
     }
 
-    public class AllCharsNotGTHandler : CombineToStringSymbolHandler {
-        public AllCharsNotGTHandler() : base("allchars_not_gt") { }
+    public class AllCharsNotGTHandler : ISymbolHandler {
+        public string SymbolName { get; } = "allchars_not_gt";
+
+        public List<object> Call(List<object> args) {
+            return new List<object> { args.Cast<string>().ToDelimitedString("").Replace(@"\>", ">") };
+        }
     }
 
-    public class AllCharsNotQuoteHandler : CombineToStringSymbolHandler {
-        public AllCharsNotQuoteHandler() : base("allchars_not_quote") { }
+    public class AllCharsNotQuoteHandler : ISymbolHandler {
+        public string SymbolName { get; } = "allchars_not_quote";
+
+        public List<object> Call(List<object> args) {
+            return new List<object> { args.Cast<string>().ToDelimitedString("").Replace(@"\'", "'") };
+        }
     }
 }

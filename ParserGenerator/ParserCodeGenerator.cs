@@ -4,7 +4,7 @@ using System.Linq;
 namespace ParserGenerator {
     public static class ParserCodeGenerator {
         public static string Literal(string value) => $"Literal(\"{value}\")";
-        public static string Symbol(string symbolName) => $"FixType(() => Eval(SymbolParsers[\"{symbolName}\"]))";
+        public static string Symbol(string symbolName) => $"FixType(() => SymbolParsers[\"{symbolName}\"])";
         public static string Negate(string parserToNegate) => $"Negate({parserToNegate})";
         public static string InOrder(IEnumerable<string> parsers) => $"InOrder({string.Join(", ", parsers)})";
         public static string Any(IEnumerable<string> parsers) => $"Any({string.Join(", ", parsers)})";
@@ -23,7 +23,7 @@ namespace DynamicInterpreter {{
         public class Result : List<Union<string, Tuple<string, Result>>> {{ }}
         public delegate Tuple<State, string> Parse(string data, Result acc);
 
-        public static IReadOnlyDictionary<string, Union<Parse, Func<Parse>>> SymbolParsers = new Dictionary<string, Union<Parse, Func<Parse>>>(){{
+        public static IReadOnlyDictionary<string, Parse> SymbolParsers = new Dictionary<string, Parse>(){{
             {string.Join(",\n\t\t\t", allAssignments.ToArray())}
         }};
 

@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Utility;
+using System.Threading;
 
 namespace Tests {
     public class InterpreterTests : AssertionHelper {
@@ -73,19 +74,40 @@ namespace Tests {
             Expect(result.Match<object>(x => x[0], x => x), Is.EqualTo("1"), "result was incorrect");
         }
 
-        //TODO:: There is some kind of mishandling with escape characters (good proof is running the repl to load a language, the c:\... '\' doesn't parse)
-        [TestCase(@"\\\'", @"\'")]
-        [TestCase(@"\'", @"'")]
-        public void EscapeMatches(string arg1, string arg2) {
-            var grammar = $@"<escaped> = '\\'-'\\'|'\\\\'<escaped>
-                             <EntryPoint> = -(-<escaped>'\'')'{arg1}'";
-            var codeToRun = arg2;
+        [Test]
+        public void LiteralWithSlash() {
+            var grammar = $"<{Constants.EntryPointSymbolName}> = '\\12'";
+            var codeToRun = @"\12";
             var interp = new Interpreter();
             var maybeErr = Parser.GenerateParser(grammar).Match(x => interp.Setup(x, new CombineToStringSymbolHandler(Constants.EntryPointSymbolName)), x => x);
             maybeErr.Apply(x => Expect(false, $"Unexpected error: {x}"));
 
             var result = interp.Execute(codeToRun);
-            Expect(result.Match<object>(x => x[0], x => x), Is.EqualTo(arg2), "result was incorrect");
+            Expect(result.Match<object>(x => x[0], x => x), Is.EqualTo(@"\12"), "result was incorrect");
+        }
+
+        [Test]
+        public void LiteralWithQuotes() {
+            var grammar = $"<{Constants.EntryPointSymbolName}> = '\"123\"'";
+            var codeToRun = "\"123\"";
+            var interp = new Interpreter();
+            var maybeErr = Parser.GenerateParser(grammar).Match(x => interp.Setup(x, new CombineToStringSymbolHandler(Constants.EntryPointSymbolName)), x => x);
+            maybeErr.Apply(x => Expect(false, $"Unexpected error: {x}"));
+
+            var result = interp.Execute(codeToRun);
+            Expect(result.Match<object>(x => x[0], x => x), Is.EqualTo("\"123\""), "result was incorrect");
+        }
+
+        [Test]
+        public void PathTest() {
+            var grammar = $"<{Constants.EntryPointSymbolName}> = 'C:\\test'";
+            var codeToRun = "C:\\test";
+            var interp = new Interpreter();
+            var maybeErr = Parser.GenerateParser(grammar).Match(x => interp.Setup(x, new CombineToStringSymbolHandler(Constants.EntryPointSymbolName)), x => x);
+            maybeErr.Apply(x => Expect(false, $"Unexpected error: {x}"));
+
+            var result = interp.Execute(codeToRun);
+            Expect(result.Match<object>(x => x[0], x => x), Is.EqualTo("C:\\test"), "result was incorrect");
         }
 
         [Test]
