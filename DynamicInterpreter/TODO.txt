@@ -9,6 +9,6 @@
 	--add any character match (*)
 	--add range support [a-z] [a-Z] [Z-a] [A-Z] [0-9] etc..
 	--add support for hexcode char literals
-	-error feedback
+	-less verbose error feedback
 
 --Working on

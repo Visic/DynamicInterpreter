@@ -19,7 +19,7 @@ namespace DynamicInterpreter {
         public Tuple<List<object>, List<Error>> Execute(string code) {
             var parserResult = new Result();
             var errors = new List<Error>();
-            var result = _parser(code, parserResult, errors);
+            var result = _parser(code, 0, parserResult, errors);
             return Tuple.Create(RecursiveEval(parserResult), errors);
         }
 
