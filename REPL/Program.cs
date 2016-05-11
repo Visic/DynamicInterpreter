@@ -22,7 +22,7 @@ namespace REPL {
 
             var commandHandler = new GenericSymbolHandler("command", CallREPLCommand);
             _commandInterp.Setup(
-                Parser.GenerateParser(Resources.REPLCommandGrammar).Match(x => x, x => { }).Value, //safe to ignore errors unless I decide to change the repl command parser definition
+                Parser.GenerateParser(Resources.REPLCommandGrammar).Item1, //safe to ignore errors unless I decide to change the repl command parser definition
                 new CombineToStringSymbolHandler("arg"),
                 new CombineToStringSymbolHandler("cmdname"),
                 commandHandler
@@ -31,8 +31,13 @@ namespace REPL {
             while(true) { //handle switching prompts
                 Prompt(Constants.ReplPromptName, x => { _commandInterp.Execute(x); }, _cmdBuffer);
                 Prompt(LanguageName, x => {
-                    if(_languageInterp != null) BetterConsole.WriteOnNextLine($"({_languageInterp.Execute(x).Match<string>(y => string.Join(", ", y.ToArray()), y => y)})");
-                    else BetterConsole.WriteOnNextLine("Language not loaded. Use REPL Command {Language} to load a language assembly.");
+                    if(_languageInterp != null) {
+                        var results = _languageInterp.Execute(x);
+                        if(results.Item1.Count > 0) BetterConsole.WriteOnNextLine($"Result: ({string.Join(", ", results.Item1)})", ConsoleColor.Green);
+                        if (results.Item2.Count > 0) BetterConsole.WriteOnNextLine($"Errors: \n{string.Join("\n\n", results.Item2.Select(y => TreePrinter.ToString(y, z => z.SubErrors)))}", ConsoleColor.Red);
+                    } else {
+                        BetterConsole.WriteOnNextLine("Language not loaded. Use REPL Command {Language} to load a language assembly.");
+                    }
                 }, _langBuffer);
             }
         }

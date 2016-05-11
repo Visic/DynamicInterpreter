@@ -23,11 +23,12 @@ namespace Tests {
             var codeToRun = "1";
             var addHandler = Handler.Create(Constants.EntryPointSymbolName, args => int.Parse(args.ToDelimitedString("")));
             var interp = new Interpreter();
-            var maybeErr = Parser.GenerateParser(grammar).Match(x => interp.Setup(x, addHandler), x => x);
-            maybeErr.Apply(x => Expect(false, $"Unexpected error: {x}"));
+            var results = Parser.GenerateParser(grammar);
+            Expect(results.Item2, Is.Empty);
+            interp.Setup(results.Item1, addHandler);
 
             var result = interp.Execute(codeToRun);
-            Expect(result.Match<object>(x => x[0], x => x), Is.EqualTo(1), "result was incorrect");
+            Expect(result.Item1[0], Is.EqualTo(1), "result was incorrect");
         }
 
         [Test]
@@ -35,14 +36,12 @@ namespace Tests {
             var grammar = $"<{Constants.EntryPointSymbolName}> = '0'('1'|'2''3')";
             var codeToRun = "0231";
             var interp = new Interpreter();
-            var maybeErr = Parser.GenerateParser(grammar).Match(
-                x => interp.Setup(x, new CombineToStringSymbolHandler(Constants.EntryPointSymbolName)), 
-                x => x
-            );
-            maybeErr.Apply(x => Expect(false, $"Unexpected error: {x}"));
+            var results = Parser.GenerateParser(grammar);
+            Expect(results.Item2, Is.Empty);
+            interp.Setup(results.Item1, new CombineToStringSymbolHandler(Constants.EntryPointSymbolName));
 
             var result = interp.Execute(codeToRun);
-            Expect(result.Match<object>(x => x[0], x => x), Is.EqualTo("023"), "result was incorrect");
+            Expect(result.Item1[0], Is.EqualTo("023"), "result was incorrect");
         }
 
         [Test, Description("The result should not be a keyword, due to the negative match")]
@@ -55,11 +54,12 @@ namespace Tests {
                              <{Constants.EntryPointSymbolName}> = <name>|<keyword>";
             var codeToRun = "abca";
             var interp = new Interpreter();
-            var maybeErr = Parser.GenerateParser(grammar).Match(x => interp.Setup(x, new CombineToStringSymbolHandler("keyword")), x => x);
-            maybeErr.Apply(x => Expect(false, $"Unexpected error: {x}"));
+            var results = Parser.GenerateParser(grammar);
+            Expect(results.Item2, Is.Empty);
+            interp.Setup(results.Item1, new CombineToStringSymbolHandler("keyword"));
 
             var result = interp.Execute(codeToRun);
-            Expect(result.Match<object>(x => x[0], x => x), Is.Not.EqualTo("abc"), "result was incorrect");
+            Expect(result.Item1[0], Is.Not.EqualTo("abc"), "result was incorrect");
         }
 
         [Test, Description("Inverting a negative match should result in success with no characters consumed")]
@@ -67,11 +67,12 @@ namespace Tests {
             var grammar = $"<EntryPoint> = -(-'1')'1'";
             var codeToRun = "11";
             var interp = new Interpreter();
-            var maybeErr = Parser.GenerateParser(grammar).Match(x => interp.Setup(x, new CombineToStringSymbolHandler(Constants.EntryPointSymbolName)), x => x);
-            maybeErr.Apply(x => Expect(false, $"Unexpected error: {x}"));
+            var results = Parser.GenerateParser(grammar);
+            Expect(results.Item2, Is.Empty);
+            interp.Setup(results.Item1, new CombineToStringSymbolHandler(Constants.EntryPointSymbolName));
 
             var result = interp.Execute(codeToRun);
-            Expect(result.Match<object>(x => x[0], x => x), Is.EqualTo("1"), "result was incorrect");
+            Expect(result.Item1[0], Is.EqualTo("1"), "result was incorrect");
         }
 
         [Test]
@@ -79,11 +80,12 @@ namespace Tests {
             var grammar = $"<{Constants.EntryPointSymbolName}> = '\\12'";
             var codeToRun = @"\12";
             var interp = new Interpreter();
-            var maybeErr = Parser.GenerateParser(grammar).Match(x => interp.Setup(x, new CombineToStringSymbolHandler(Constants.EntryPointSymbolName)), x => x);
-            maybeErr.Apply(x => Expect(false, $"Unexpected error: {x}"));
+            var results = Parser.GenerateParser(grammar);
+            Expect(results.Item2, Is.Empty);
+            interp.Setup(results.Item1, new CombineToStringSymbolHandler(Constants.EntryPointSymbolName));
 
             var result = interp.Execute(codeToRun);
-            Expect(result.Match<object>(x => x[0], x => x), Is.EqualTo(@"\12"), "result was incorrect");
+            Expect(result.Item1[0], Is.EqualTo(@"\12"), "result was incorrect");
         }
 
         [Test]
@@ -91,11 +93,12 @@ namespace Tests {
             var grammar = $"<{Constants.EntryPointSymbolName}> = '\"123\"'";
             var codeToRun = "\"123\"";
             var interp = new Interpreter();
-            var maybeErr = Parser.GenerateParser(grammar).Match(x => interp.Setup(x, new CombineToStringSymbolHandler(Constants.EntryPointSymbolName)), x => x);
-            maybeErr.Apply(x => Expect(false, $"Unexpected error: {x}"));
+            var results = Parser.GenerateParser(grammar);
+            Expect(results.Item2, Is.Empty);
+            interp.Setup(results.Item1, new CombineToStringSymbolHandler(Constants.EntryPointSymbolName));
 
             var result = interp.Execute(codeToRun);
-            Expect(result.Match<object>(x => x[0], x => x), Is.EqualTo("\"123\""), "result was incorrect");
+            Expect(result.Item1[0], Is.EqualTo("\"123\""), "result was incorrect");
         }
 
         [Test]
@@ -103,11 +106,12 @@ namespace Tests {
             var grammar = $"<{Constants.EntryPointSymbolName}> = 'C:\\test'";
             var codeToRun = "C:\\test";
             var interp = new Interpreter();
-            var maybeErr = Parser.GenerateParser(grammar).Match(x => interp.Setup(x, new CombineToStringSymbolHandler(Constants.EntryPointSymbolName)), x => x);
-            maybeErr.Apply(x => Expect(false, $"Unexpected error: {x}"));
+            var results = Parser.GenerateParser(grammar);
+            Expect(results.Item2, Is.Empty);
+            interp.Setup(results.Item1, new CombineToStringSymbolHandler(Constants.EntryPointSymbolName));
 
             var result = interp.Execute(codeToRun);
-            Expect(result.Match<object>(x => x[0], x => x), Is.EqualTo("C:\\test"), "result was incorrect");
+            Expect(result.Item1[0], Is.EqualTo("C:\\test"), "result was incorrect");
         }
 
         [Test]
@@ -115,11 +119,12 @@ namespace Tests {
             var grammar = $"<{Constants.EntryPointSymbolName}> = ''";
             var codeToRun = "1";
             var interp = new Interpreter();
-            var maybeErr = Parser.GenerateParser(grammar).Match(x => interp.Setup(x, new CombineToStringSymbolHandler(Constants.EntryPointSymbolName)), x => x);
-            maybeErr.Apply(x => Expect(false, $"Unexpected error: {x}"));
+            var results = Parser.GenerateParser(grammar);
+            Expect(results.Item2, Is.Empty);
+            interp.Setup(results.Item1, new CombineToStringSymbolHandler(Constants.EntryPointSymbolName));
 
             var result = interp.Execute(codeToRun);
-            Expect(result.Match<object>(x => x[0], x => x), Is.EqualTo(""), "result was incorrect");
+            Expect(result.Item1[0], Is.EqualTo(""), "result was incorrect");
         }
 
         [Test, Description("Negating the empty string should always fail")]
@@ -127,11 +132,12 @@ namespace Tests {
             var grammar = $"<{Constants.EntryPointSymbolName}> = -'''1'";
             var codeToRun = "1";
             var interp = new Interpreter();
-            var maybeErr = Parser.GenerateParser(grammar).Match(x => interp.Setup(x, new CombineToStringSymbolHandler(Constants.EntryPointSymbolName)), x => x);
-            maybeErr.Apply(x => Expect(false, $"Unexpected error: {x}"));
+            var results = Parser.GenerateParser(grammar);
+            Expect(results.Item2, Is.Empty);
+            interp.Setup(results.Item1, new CombineToStringSymbolHandler(Constants.EntryPointSymbolName));
 
             var result = interp.Execute(codeToRun);
-            result.Match(x => Expect(false, "Negating the empty string should always fail"), x => x);
+            Expect(result.Item1, Is.Empty, "Negating the empty string should always fail");
         }
 
         [Test]
@@ -140,11 +146,12 @@ namespace Tests {
             var codeToRun = "111";
             var entryHandler = Handler.Create(Constants.EntryPointSymbolName, args => int.Parse(args.ToDelimitedString("")));
             var interp = new Interpreter();
-            var maybeErr = Parser.GenerateParser(grammar).Match(x => interp.Setup(x, entryHandler), x => x);
-            maybeErr.Apply(x => Expect(false, $"Unexpected error: {x}"));
+            var results = Parser.GenerateParser(grammar);
+            Expect(results.Item2, Is.Empty);
+            interp.Setup(results.Item1, entryHandler);
 
             var result = interp.Execute(codeToRun);
-            Expect(result.Match<object>(x => x[0], x => x), Is.EqualTo(111), "result was incorrect");
+            Expect(result.Item1[0], Is.EqualTo(111), "result was incorrect");
         }
 
         [Test]
@@ -155,11 +162,12 @@ namespace Tests {
             var entryHandler = Handler.Create(Constants.EntryPointSymbolName, args => args.ToDelimitedString(""));
             var aHandler = Handler.Create("a", args => args.ToDelimitedString(""));
             var interp = new Interpreter();
-            var maybeErr = Parser.GenerateParser(grammar).Match(x => interp.Setup(x, entryHandler, aHandler), x => x);
-            maybeErr.Apply(x => Expect(false, $"Unexpected error: {x}"));
+            var results = Parser.GenerateParser(grammar);
+            Expect(results.Item2, Is.Empty);
+            interp.Setup(results.Item1, entryHandler, aHandler);
 
             var result = interp.Execute(codeToRun);
-            Expect(result.Match<object>(x => x[0], x => x), Is.EqualTo("12121"), "result was incorrect");
+            Expect(result.Item1[0], Is.EqualTo("12121"), "result was incorrect");
         }
 
         [Test]
@@ -173,11 +181,12 @@ namespace Tests {
             var digitHandler = Handler.Create("digit", args => int.Parse(args.First().ToString()));
             var addHandler = Handler.Create("add", args => args.Select(x => x.ToString() == "+" ? 0 : (int)x).Sum());
             var interp = new Interpreter();
-            var maybeErr = Parser.GenerateParser(grammar).Match(x => interp.Setup(x, entryHandler, digitHandler, addHandler), x => x);
-            maybeErr.Apply(x => Expect(false, $"Unexpected error: {x}"));
+            var results = Parser.GenerateParser(grammar);
+            Expect(results.Item2, Is.Empty);
+            interp.Setup(results.Item1, entryHandler, digitHandler, addHandler);
 
             var result = interp.Execute(codeToRun);
-            Expect(result.Match<object>(x => x[0], x => x), Is.EqualTo(15), "Incorrect result");
+            Expect(result.Item1[0], Is.EqualTo(15), "Incorrect result");
         }
 
         [Test]
@@ -191,11 +200,12 @@ namespace Tests {
             var codeToRun = "123abc";
             var entryHandler = Handler.Create(Constants.EntryPointSymbolName, args => args);
             var interp = new Interpreter();
-            var maybeErr = Parser.GenerateParser(grammar).Match(x => interp.Setup(x, entryHandler), x => x);
-            maybeErr.Apply(x => Expect(false, $"Unexpected error: {x}"));
+            var results = Parser.GenerateParser(grammar);
+            Expect(results.Item2, Is.Empty);
+            interp.Setup(results.Item1, entryHandler);
 
             var result = interp.Execute(codeToRun);
-            Expect(result.Match<object>(x => x.ToDelimitedString(""), x => x), Is.EqualTo(codeToRun));
+            Expect(result.Item1.ToDelimitedString(""), Is.EqualTo(codeToRun));
         }
     }
 }

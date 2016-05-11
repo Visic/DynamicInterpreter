@@ -4,22 +4,23 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Utility;
+using static DynamicInterpreter.Parser;
 
 namespace DynamicInterpreter {
     public class Interpreter {
-        Parser.Parse _parser;
+        Parse _parser;
         Dictionary<string, ISymbolHandler> _handlers;
 
-        public void Setup(Parser.Parse parser, params ISymbolHandler[] handlers) {
+        public void Setup(Parse parser, params ISymbolHandler[] handlers) {
             _handlers = handlers.ToDictionary(x => x.SymbolName);
             _parser = parser;
         }
 
-        public Union<List<object>, string> Execute(string code) {
-            var parserResult = new Parser.Result();
-            var result = _parser(code, parserResult);
-            if(result.Item1 == Parser.State.Failure) return "Parse error";
-            return RecursiveEval(parserResult);
+        public Tuple<List<object>, List<Error>> Execute(string code) {
+            var parserResult = new Result();
+            var errors = new List<Error>();
+            var result = _parser(code, parserResult, errors);
+            return Tuple.Create(RecursiveEval(parserResult), errors);
         }
 
         private List<object> RecursiveEval(Parser.Result result) {

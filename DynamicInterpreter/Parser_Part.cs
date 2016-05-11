@@ -64,11 +64,9 @@ namespace DynamicInterpreter {
             );
         }
 
-        public static Union<Parse, string> GenerateParser(string description) {
-            return _interpreter.Execute(description).Match(
-                x => Eval((Union<Parse, Func<Parse>>)x[0]),
-                x => x
-            );
+        public static Tuple<Parse, List<Error>> GenerateParser(string description) {
+            var results = _interpreter.Execute(description);
+            return Tuple.Create(Eval((Union<Parse, Func<Parse>>)results.Item1[0]), results.Item2);
         }
     }
 }

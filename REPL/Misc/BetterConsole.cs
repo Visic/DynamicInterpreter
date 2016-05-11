@@ -173,6 +173,15 @@ namespace REPL {
             Write(fmtstr, args);
         }
 
+        public static void WriteOnNextLine(string val, ConsoleColor color) {
+            MoveToNextLine();
+
+            var curColor = Console.ForegroundColor;
+            Console.ForegroundColor = color;
+            Write(val);
+            Console.ForegroundColor = curColor;
+        }
+
         public static void WriteOnNextLine(string val) {
             MoveToNextLine();
             Write(val);
