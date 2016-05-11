@@ -24,6 +24,15 @@ namespace ParserGenerator {
         }
     }
 
+    public class FallbackPointHandler : ISymbolHandler {
+        public string SymbolName { get; } = "fallback_point";
+
+        public List<object> Call(List<object> args) {
+            var assignment = (Tuple<string, string>)args[1];
+            return new List<object> { Tuple.Create(assignment.Item1, ParserCodeGenerator.FallbackPoint(assignment.Item2)) };
+        }
+    }
+
     public class InOrderHandler : ISymbolHandler {
         public string SymbolName { get; } = "all_inorder";
 
@@ -54,7 +63,17 @@ namespace ParserGenerator {
         public string SymbolName { get; } = "assignment";
 
         public List<object> Call(List<object> args) {
-            return new List<object> { ParserCodeGenerator.Assignment((string)args[1], (string)args[4]) };
+            var newSymbolName = (string)args[1];
+            return new List<object> { Tuple.Create(newSymbolName, ParserCodeGenerator.Assignment(newSymbolName, (string)args[4])) };
+        }
+    }
+
+    public class AllAssignmentsHandler : ISymbolHandler {
+        public string SymbolName { get; } = "all_all_assignments";
+
+        public List<object> Call(List<object> args) {
+            var castArgs = args.Take(args.Count - 1).Cast<Tuple<string, string>>().ToArray();
+            return ParserCodeGenerator.AllAssignments(castArgs).Cast<object>().ToList();
         }
     }
 

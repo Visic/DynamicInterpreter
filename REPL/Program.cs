@@ -49,7 +49,7 @@ namespace REPL {
             var done = false;
             while(!done) {
                 BetterConsole.Prompt(
-                    $"{promptText}>", 
+                    $"{promptText}>",
                     buffer,
                     BetterConsole.MakeKeyHandler(ConsoleKey.Escape, v => done = true),
                     BetterConsole.MakeKeyHandler(ConsoleKey.Enter, v => {

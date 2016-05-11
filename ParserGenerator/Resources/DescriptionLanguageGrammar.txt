@@ -26,5 +26,7 @@
 <negation> = '-'(<group>|<symbol>|<literal>|<negation>)
 <assignment> = <ignore_all_whitespace>'<'<allchars_not_gt>'>'<ignore_all_whitespace>'='<all_any><ignore_all_whitespace>
 
-<all_assignments> = <assignment>|<assignment><all_assignments>
-<EntryPoint> = <all_assignments>
+<fallback_point> = 'f'<assignment>
+f<all_assignments> = (<assignment>|<fallback_point>)(''|<all_assignments>)
+<all_all_assignments> = <all_assignments>
+<EntryPoint> = <all_all_assignments>

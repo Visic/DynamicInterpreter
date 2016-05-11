@@ -13,5 +13,5 @@
 <arg> = <all_no_whitespace_or_quotes>|'"'<all_no_quotes>'"'
 <args> = <arg>|<arg><whitespace><args>
 <cmdname> = <letter>|<letter><cmdname>
-<command> = <cmdname>|<cmdname><whitespace><args>
+f<command> = <cmdname>|<cmdname><whitespace><args>
 <EntryPoint> = <command>

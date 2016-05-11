@@ -20,13 +20,7 @@ namespace DynamicInterpreter {
                 new GenericSymbolHandler("symbol", args => new List<object> { new Union<Parse, Func<Parse>>(FixType(() => assignedSymbols[(string)args[1]])) }),
                 new GenericSymbolHandler("negation", args => new List<object> { new Union<Parse, Func<Parse>>(Negate((Union<Parse, Func<Parse>>)args[1])) }),
                 new GenericSymbolHandler("group", args => new List<object> { (Union<Parse, Func<Parse>>)args[1] }),
-                new GenericSymbolHandler("EntryPoint", args => new List<object> { assignedSymbols["EntryPoint"] }),
-
-                new GenericSymbolHandler("assignment", args => {
-                    var str = ((string)args[1]).Replace("\\\\", "\\");
-                    assignedSymbols[str] = Symbol(str, (Union<Parse, Func<Parse>>)args[4]);
-                    return new List<object>();
-                }),
+                new GenericSymbolHandler("EntryPoint", args => new List<object> { new Union<Parse, Func<Parse>>(assignedSymbols["EntryPoint"]) }),
 
                 new GenericSymbolHandler("allchars_not_gt", args => {
                     return new List<object> { args.Cast<string>().ToDelimitedString("").Replace(@"\>", ">") };
@@ -34,6 +28,24 @@ namespace DynamicInterpreter {
 
                 new GenericSymbolHandler("allchars_not_quote", args => {
                     return new List<object> { args.Cast<string>().ToDelimitedString("").Replace(@"\'", "'") };
+                }),
+
+                new GenericSymbolHandler("fallback_point", args => {
+                    var assignment = (Tuple<string, Union<Parse, Func<Parse>>>)args[1];
+                    return new List<object> { Tuple.Create(assignment.Item1, new Union<Parse, Func<Parse>>(FallbackPoint(assignment.Item2))) };
+                }),
+
+                new GenericSymbolHandler("assignment", args => {
+                    var str = ((string)args[1]).Replace("\\\\", "\\");
+                    return new List<object>() { Tuple.Create(str, new Union<Parse, Func<Parse>>(Symbol(str, (Union<Parse, Func<Parse>>)args[4]))) };
+                }),
+
+                new GenericSymbolHandler("all_all_assignments", args => {
+                    var castArgs = args.Take(args.Count - 1).Cast<Tuple<string, Union<Parse, Func<Parse>>>>().ToArray();
+                    foreach(var ele in castArgs) {
+                        assignedSymbols[ele.Item1] = Eval(ele.Item2);
+                    }
+                    return new List<object>();
                 }),
 
                 new GenericSymbolHandler("all_inorder", args => {
@@ -54,7 +66,7 @@ namespace DynamicInterpreter {
 
         public static Union<Parse, string> GenerateParser(string description) {
             return _interpreter.Execute(description).Match(
-                x => (Parse)x[0],
+                x => Eval((Union<Parse, Func<Parse>>)x[0]),
                 x => x
             );
         }

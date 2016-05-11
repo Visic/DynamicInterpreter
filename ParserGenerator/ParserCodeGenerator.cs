@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace ParserGenerator {
@@ -8,7 +9,12 @@ namespace ParserGenerator {
         public static string Negate(string parserToNegate) => $"Negate({parserToNegate})";
         public static string InOrder(IEnumerable<string> parsers) => $"InOrder({string.Join(", ", parsers)})";
         public static string Any(IEnumerable<string> parsers) => $"Any({string.Join(", ", parsers)})";
-        public static string Assignment(string symbolName, string parser) => $"{{\"{symbolName}\", Symbol(\"{symbolName}\", {parser})}}";
+        public static string Assignment(string symbolName, string parser) => $"Symbol(\"{symbolName}\", {parser})";
+        public static string FallbackPoint(string parser) => $"FallbackPoint({parser})";
+
+        public static IEnumerable<string> AllAssignments(Tuple<string, string>[] allAssignments) {
+            return allAssignments.Select(x => $"{{\"{x.Item1}\", {x.Item2}}}");
+        }
 
         public static string EntryPoint(IEnumerable<string> allAssignments) {
             return
@@ -23,7 +29,7 @@ namespace DynamicInterpreter {{
         public class Result : List<Union<string, Tuple<string, Result>>> {{ }}
         public delegate Tuple<State, string> Parse(string data, Result acc);
 
-        public static IReadOnlyDictionary<string, Parse> SymbolParsers = new Dictionary<string, Parse>(){{
+        public static IReadOnlyDictionary<string, Parse> SymbolParsers = new Dictionary<string, Parse>() {{
             {string.Join(",\n\t\t\t", allAssignments.ToArray())}
         }};
 
@@ -52,6 +58,19 @@ namespace DynamicInterpreter {{
                 var result = Eval(parserToNegate)(data, newAcc);
                 if(result.Item1 == State.Success) return Tuple.Create(State.Failure, data);
                 return Tuple.Create(State.Success, data);
+            }};
+        }}
+
+        private static Parse FallbackPoint(Union<Parse, Func<Parse>> parser) {{
+            return (data, acc) => {{
+                Result newAcc;
+                Tuple<State, string> result;
+                while((result = Eval(parser)(data, newAcc = new Result())).Item1 == State.Failure) {{
+                    if(data.Length == 0) break;
+                    data = data.Substring(1); //while the parser failed, skip a character and try again
+                }}
+                if (result.Item1 == State.Success) acc.AddRange(newAcc);
+                return result;
             }};
         }}
 

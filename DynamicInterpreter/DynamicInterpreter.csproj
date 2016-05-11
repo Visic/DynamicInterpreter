@@ -59,6 +59,7 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <None Include="HowToAddNewLanguageFeatures.txt" />
     <Content Include="TODO.txt" />
   </ItemGroup>
   <ItemGroup>
