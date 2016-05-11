@@ -10,6 +10,5 @@
 	--add range support [a-z] [a-Z] [Z-a] [A-Z] [0-9] etc..
 	--add support for hexcode char literals
 	-error feedback
-	-continuing parsing after finding an error (will probably need a way to denote an error handler in the grammar)
 
 --Working on
