@@ -11,7 +11,7 @@ namespace DynamicInterpreter {
                 CharacterIndex = characterIndex;
             }
 
-            public Error(string message, List<Error> subErrors, int characterIndex) : this (message, characterIndex) {
+            public Error(string message, List<Error> subErrors, int characterIndex) : this(message, characterIndex) {
                 SubErrors = subErrors;
             }
 
@@ -29,22 +29,18 @@ namespace DynamicInterpreter {
         public delegate Tuple<State, string> Parse(string data, int charsHandledSoFar, Result acc, List<Error> errors);
 
         public static IReadOnlyDictionary<string, Parse> SymbolParsers = new Dictionary<string, Parse>() {
-            {"uppercase", Symbol("uppercase", Any(Literal("A"), Literal("B"), Literal("C"), Literal("D"), Literal("E"), Literal("F"), Literal("G"), Literal("H"), Literal("I"), Literal("J"), Literal("K"), Literal("L"), Literal("M"), Literal("N"), Literal("O"), Literal("P"), Literal("Q"), Literal("R"), Literal("S"), Literal("T"), Literal("U"), Literal("V"), Literal("W"), Literal("X"), Literal("Y"), Literal("Z")))},
-            {"lowercase", Symbol("lowercase", Any(Literal("a"), Literal("b"), Literal("c"), Literal("d"), Literal("e"), Literal("f"), Literal("g"), Literal("h"), Literal("i"), Literal("j"), Literal("k"), Literal("l"), Literal("m"), Literal("n"), Literal("o"), Literal("p"), Literal("q"), Literal("r"), Literal("s"), Literal("t"), Literal("u"), Literal("v"), Literal("w"), Literal("x"), Literal("y"), Literal("z")))},
-            {"digits", Symbol("digits", Any(Literal("0"), Literal("1"), Literal("2"), Literal("3"), Literal("4"), Literal("5"), Literal("6"), Literal("7"), Literal("8"), Literal("9")))},
             {"whitespace", Symbol("whitespace", Any(Literal(" "), Literal("\t"), Literal("\r\n"), Literal("\n")))},
-            {"specialchars", Symbol("specialchars", Any(Literal("!"), Literal("#"), Literal("$"), Literal("%"), Literal("&"), Literal("'"), Literal("("), Literal(")"), Literal("*"), Literal("+"), Literal(","), Literal("."), Literal("/"), Literal(":"), Literal(";"), Literal("<"), Literal(">"), Literal("?"), Literal("@"), Literal("["), Literal("]"), Literal("^"), Literal("_"), Literal("`"), Literal("{"), Literal("|"), Literal("}"), Literal("~"), Literal("\\"), Literal("\""), Literal("="), Literal("-")))},
             {"escaped", Symbol("escaped", Any(InOrder(Literal("\\"), Negate(Literal("\\"))), InOrder(Literal("\\\\"), FixType(() => SymbolParsers["escaped"]))))},
             {"all_escape_chars", Symbol("all_escape_chars", Any(Literal("\\"), InOrder(Literal("\\"), FixType(() => SymbolParsers["all_escape_chars"]))))},
             {"almost_all_escape_chars", Symbol("almost_all_escape_chars", Any(InOrder(Literal("\\"), Negate(Negate(Literal("\\")))), InOrder(Literal("\\"), FixType(() => SymbolParsers["almost_all_escape_chars"]))))},
-            {"anychar", Symbol("anychar", Any(FixType(() => SymbolParsers["uppercase"]), FixType(() => SymbolParsers["lowercase"]), FixType(() => SymbolParsers["digits"]), FixType(() => SymbolParsers["whitespace"]), FixType(() => SymbolParsers["specialchars"])))},
             {"all_whitespace", Symbol("all_whitespace", Any(FixType(() => SymbolParsers["whitespace"]), InOrder(FixType(() => SymbolParsers["whitespace"]), FixType(() => SymbolParsers["all_whitespace"]))))},
             {"ignore_all_whitespace", Symbol("ignore_all_whitespace", Any(Literal(""), FixType(() => SymbolParsers["all_whitespace"])))},
-            {"allchars_not_quote", Symbol("allchars_not_quote", InOrder(Negate(Any(Literal("'"), InOrder(FixType(() => SymbolParsers["escaped"]), FixType(() => SymbolParsers["almost_all_escape_chars"]), Literal("\\'")))), Any(InOrder(Negate(Negate(FixType(() => SymbolParsers["escaped"]))), FixType(() => SymbolParsers["all_escape_chars"]), FixType(() => SymbolParsers["anychar"])), InOrder(Negate(FixType(() => SymbolParsers["escaped"])), FixType(() => SymbolParsers["all_escape_chars"])), FixType(() => SymbolParsers["anychar"])), Any(Literal(""), FixType(() => SymbolParsers["allchars_not_quote"]))))},
+            {"anychar", Symbol("anychar", Literal("*"))},
+            {"allchars_not_quote", Symbol("allchars_not_quote", InOrder(Negate(Any(Literal("'"), InOrder(FixType(() => SymbolParsers["escaped"]), FixType(() => SymbolParsers["almost_all_escape_chars"]), Literal("\\'")))), Any(InOrder(Negate(Negate(FixType(() => SymbolParsers["escaped"]))), FixType(() => SymbolParsers["all_escape_chars"]), AnyChar()), InOrder(Negate(FixType(() => SymbolParsers["escaped"])), FixType(() => SymbolParsers["all_escape_chars"])), AnyChar()), Any(Literal(""), FixType(() => SymbolParsers["allchars_not_quote"]))))},
             {"literal", Symbol("literal", InOrder(Literal("'"), Any(Literal(""), FixType(() => SymbolParsers["allchars_not_quote"])), Literal("'")))},
-            {"allchars_not_gt", Symbol("allchars_not_gt", InOrder(Negate(Any(Literal(">"), InOrder(FixType(() => SymbolParsers["escaped"]), FixType(() => SymbolParsers["almost_all_escape_chars"]), Literal("\\>")))), Any(InOrder(Negate(Negate(FixType(() => SymbolParsers["escaped"]))), FixType(() => SymbolParsers["all_escape_chars"]), FixType(() => SymbolParsers["anychar"])), InOrder(Negate(FixType(() => SymbolParsers["escaped"])), FixType(() => SymbolParsers["all_escape_chars"])), FixType(() => SymbolParsers["anychar"])), Any(Literal(""), FixType(() => SymbolParsers["allchars_not_gt"]))))},
+            {"allchars_not_gt", Symbol("allchars_not_gt", InOrder(Negate(Any(Literal(">"), InOrder(FixType(() => SymbolParsers["escaped"]), FixType(() => SymbolParsers["almost_all_escape_chars"]), Literal("\\>")))), Any(InOrder(Negate(Negate(FixType(() => SymbolParsers["escaped"]))), FixType(() => SymbolParsers["all_escape_chars"]), AnyChar()), InOrder(Negate(FixType(() => SymbolParsers["escaped"])), FixType(() => SymbolParsers["all_escape_chars"])), AnyChar()), Any(Literal(""), FixType(() => SymbolParsers["allchars_not_gt"]))))},
             {"symbol", Symbol("symbol", InOrder(Literal("<"), FixType(() => SymbolParsers["allchars_not_gt"]), Literal(">")))},
-            {"inorder_ele", Symbol("inorder_ele", InOrder(FixType(() => SymbolParsers["ignore_all_whitespace"]), Any(InOrder(FixType(() => SymbolParsers["symbol"]), FixType(() => SymbolParsers["ignore_all_whitespace"]), Negate(Literal("="))), FixType(() => SymbolParsers["literal"]), FixType(() => SymbolParsers["group"]), FixType(() => SymbolParsers["negation"]))))},
+            {"inorder_ele", Symbol("inorder_ele", InOrder(FixType(() => SymbolParsers["ignore_all_whitespace"]), Any(InOrder(FixType(() => SymbolParsers["symbol"]), FixType(() => SymbolParsers["ignore_all_whitespace"]), Negate(Literal("="))), FixType(() => SymbolParsers["literal"]), FixType(() => SymbolParsers["group"]), FixType(() => SymbolParsers["negation"]), FixType(() => SymbolParsers["anychar"]))))},
             {"inorder", Symbol("inorder", Any(FixType(() => SymbolParsers["inorder_ele"]), InOrder(FixType(() => SymbolParsers["inorder_ele"]), FixType(() => SymbolParsers["inorder"]))))},
             {"all_inorder", Symbol("all_inorder", FixType(() => SymbolParsers["inorder"]))},
             {"any", Symbol("any", Any(FixType(() => SymbolParsers["all_inorder"]), InOrder(FixType(() => SymbolParsers["all_inorder"]), Literal("|"), FixType(() => SymbolParsers["any"]))))},
@@ -68,7 +64,7 @@ namespace DynamicInterpreter {
                     acc.Add(Tuple.Create(symbolName, newAcc));
                 }
 
-                if (newErrors.Count > 0) {
+                if(newErrors.Count > 0) {
                     errors.Add(new Error($"Failed to parse {symbolName}", newErrors, charsHandledSoFar));
                 }
 
@@ -83,6 +79,18 @@ namespace DynamicInterpreter {
                     return Tuple.Create(State.Success, data.Remove(0, value.Length));
                 } else {
                     errors.Add(new Error($"Expected {value}", charsHandledSoFar));
+                    return Tuple.Create(State.Failure, data);
+                }
+            };
+        }
+
+        private static Parse AnyChar() {
+            return (data, charsHandledSoFar, acc, errors) => {
+                if(data.Length > 0) {
+                    acc.Add(data[0].ToString());
+                    return Tuple.Create(State.Success, data.Substring(1));
+                } else {
+                    errors.Add(new Error($"No text to consume", charsHandledSoFar));
                     return Tuple.Create(State.Failure, data);
                 }
             };

@@ -24,6 +24,14 @@ namespace ParserGenerator {
         }
     }
 
+    public class AnyCharHandler : ISymbolHandler {
+        public string SymbolName { get; } = "anychar";
+
+        public List<object> Call(List<object> args) {
+            return new List<object> { ParserCodeGenerator.AnyChar() };
+        }
+    }
+
     public class FallbackPointHandler : ISymbolHandler {
         public string SymbolName { get; } = "fallback_point";
 

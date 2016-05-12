@@ -1,22 +1,18 @@
-<uppercase> = 'A'|'B'|'C'|'D'|'E'|'F'|'G'|'H'|'I'|'J'|'K'|'L'|'M'|'N'|'O'|'P'|'Q'|'R'|'S'|'T'|'U'|'V'|'W'|'X'|'Y'|'Z'
-<lowercase> = 'a'|'b'|'c'|'d'|'e'|'f'|'g'|'h'|'i'|'j'|'k'|'l'|'m'|'n'|'o'|'p'|'q'|'r'|'s'|'t'|'u'|'v'|'w'|'x'|'y'|'z'
-<digits> = '0'|'1'|'2'|'3'|'4'|'5'|'6'|'7'|'8'|'9'
 <whitespace> = ' '|'\t'|'\r\n'|'\n'
-<specialchars> = '!'|'#'|'$'|'%'|'&'|'\''|'('|')'|'*'|'+'|','|'.'|'/'|':'|';'|'<'|'>'|'?'|'@'|'['|']'|'^'|'_'|'`'|'{'|'|'|'}'|'~'|'\\'|'"'|'='|'-'
 <escaped> = '\\'-'\\'|'\\\\'<escaped>
 <all_escape_chars> = '\\'|'\\'<all_escape_chars>
 <almost_all_escape_chars> = '\\'--'\\'|'\\'<almost_all_escape_chars>
-<anychar> = <uppercase>|<lowercase>|<digits>|<whitespace>|<specialchars>
 <all_whitespace> = <whitespace>|<whitespace><all_whitespace>
 <ignore_all_whitespace> = ''|<all_whitespace>
+<anychar> = '*'
 
-<allchars_not_quote> = -('\''|<escaped><almost_all_escape_chars>'\\\'')(--<escaped><all_escape_chars><anychar>|-<escaped><all_escape_chars>|<anychar>)(''|<allchars_not_quote>)
+<allchars_not_quote> = -('\''|<escaped><almost_all_escape_chars>'\\\'')(--<escaped><all_escape_chars>*|-<escaped><all_escape_chars>|*)(''|<allchars_not_quote>)
 <literal> = '\''(''|<allchars_not_quote>)'\''
 
-<allchars_not_gt> = -('>'|<escaped><almost_all_escape_chars>'\\>')(--<escaped><all_escape_chars><anychar>|-<escaped><all_escape_chars>|<anychar>)(''|<allchars_not_gt>)
+<allchars_not_gt> = -('>'|<escaped><almost_all_escape_chars>'\\>')(--<escaped><all_escape_chars>*|-<escaped><all_escape_chars>|*)(''|<allchars_not_gt>)
 <symbol> = '<'<allchars_not_gt>'>'
 
-<inorder_ele> = <ignore_all_whitespace>(<symbol><ignore_all_whitespace>-'='|<literal>|<group>|<negation>)
+<inorder_ele> = <ignore_all_whitespace>(<symbol><ignore_all_whitespace>-'='|<literal>|<group>|<negation>|<anychar>)
 <inorder> = <inorder_ele>|<inorder_ele><inorder>
 <all_inorder> = <inorder>
 

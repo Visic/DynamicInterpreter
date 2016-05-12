@@ -4,6 +4,7 @@ using System.Linq;
 
 namespace ParserGenerator {
     public static class ParserCodeGenerator {
+        public static string AnyChar() => $"AnyChar()";
         public static string Literal(string value) => $"Literal(\"{value}\")";
         public static string Symbol(string symbolName) => $"FixType(() => SymbolParsers[\"{symbolName}\"])";
         public static string Negate(string parserToNegate) => $"Negate({parserToNegate})";
@@ -77,6 +78,18 @@ namespace DynamicInterpreter {{
                     return Tuple.Create(State.Success, data.Remove(0, value.Length));
                 }} else {{
                     errors.Add(new Error($""Expected {{value}}"", charsHandledSoFar));
+                    return Tuple.Create(State.Failure, data);
+                }}
+            }};
+        }}
+
+        private static Parse AnyChar() {{
+            return (data, charsHandledSoFar, acc, errors) => {{
+                if(data.Length > 0) {{
+                    acc.Add(data[0].ToString());
+                    return Tuple.Create(State.Success, data.Substring(1));
+                }} else {{
+                    errors.Add(new Error($""No text to consume"", charsHandledSoFar));
                     return Tuple.Create(State.Failure, data);
                 }}
             }};
