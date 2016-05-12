@@ -6,20 +6,22 @@
 <ignore_all_whitespace> = ''|<all_whitespace>
 <anychar> = '*'
 
+<range> = '[' ('\\]'|'\\-'|-('-'|']')*) '-' ('\\]'|'\\-'|-('-'|']')*) ']'
+
 <allchars_not_quote> = -('\''|<escaped><almost_all_escape_chars>'\\\'')(--<escaped><all_escape_chars>*|-<escaped><all_escape_chars>|*)(''|<allchars_not_quote>)
 <literal> = '\''(''|<allchars_not_quote>)'\''
 
 <allchars_not_gt> = -('>'|<escaped><almost_all_escape_chars>'\\>')(--<escaped><all_escape_chars>*|-<escaped><all_escape_chars>|*)(''|<allchars_not_gt>)
 <symbol> = '<'<allchars_not_gt>'>'
 
-<inorder_ele> = <ignore_all_whitespace>(<symbol><ignore_all_whitespace>-'='|<literal>|<group>|<negation>|<anychar>)
+<inorder_ele> = <ignore_all_whitespace>(<symbol><ignore_all_whitespace>-'='|<literal>|<group>|<negation>|<anychar>|<range>)
 <inorder> = <inorder_ele>|<inorder_ele><inorder>
 <all_inorder> = <inorder>
 
 <any> = <all_inorder>|<all_inorder>'|'<any>
 <all_any> = <any>
 <group> = '('<all_any><ignore_all_whitespace>')'
-<negation> = '-'(<group>|<symbol>|<literal>|<negation>)
+<negation> = '-'(<group>|<symbol>|<literal>|<negation>|<range>|<anychar>)
 <assignment> = <ignore_all_whitespace>'<'<allchars_not_gt>'>'<ignore_all_whitespace>'='<all_any><ignore_all_whitespace>
 
 <fallback_point> = 'f'<assignment>

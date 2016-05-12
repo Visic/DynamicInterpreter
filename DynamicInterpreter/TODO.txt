@@ -6,7 +6,7 @@
 	--Reduce and optimize the grammar so there is little to no duplication of symbols (decision tree?)
 		--e.g  <a>='1''2'|'1''3' should be parsed as  '1' followed by any '2'|'3'
 	--Try to eliminate the need for recursion
-	--add range support [a-z] [a-Z] [Z-a] [A-Z] [0-9] etc..
 	-less verbose error feedback
+	-easier escaping support
 
 --Working on

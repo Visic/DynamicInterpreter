@@ -32,6 +32,14 @@ namespace ParserGenerator {
         }
     }
 
+    public class RangeHandler : ISymbolHandler {
+        public string SymbolName { get; } = "range";
+
+        public List<object> Call(List<object> args) {
+            return new List<object> { ParserCodeGenerator.Range(((string)args[1])[0], ((string)args[3])[0]) };
+        }
+    }
+
     public class FallbackPointHandler : ISymbolHandler {
         public string SymbolName { get; } = "fallback_point";
 

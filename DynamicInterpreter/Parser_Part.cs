@@ -57,6 +57,10 @@ namespace DynamicInterpreter {
                     return new List<object> { new Union<Parse, Func<Parse>>(AnyChar()) };
                 }),
 
+                new GenericSymbolHandler("range", args => {
+                    return new List<object> { new Union<Parse, Func<Parse>>(Range(((string)args[1])[0], ((string)args[3])[0])) };
+                }),
+
                 new GenericSymbolHandler("all_any", args => {
                     if(args.Count == 1) return args;
                     return new List<object> { new Union<Parse, Func<Parse>>(Any(args.Where(x => !(x is string)).Cast<Union<Parse, Func<Parse>>>().ToArray())) }; //just use the parsers, ignore the '|' strings

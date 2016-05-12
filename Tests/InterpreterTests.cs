@@ -32,6 +32,20 @@ namespace Tests {
         }
 
         [Test]
+        public void SimpleDigitRangeTest() {
+            var grammar = $"<{Constants.EntryPointSymbolName}> = [0-9]";
+            var codeToRun = "1";
+            var addHandler = Handler.Create(Constants.EntryPointSymbolName, args => int.Parse(args.ToDelimitedString("")));
+            var interp = new Interpreter();
+            var results = Parser.GenerateParser(grammar);
+            Expect(results.Item2, Is.Empty);
+            interp.Setup(results.Item1, addHandler);
+
+            var result = interp.Execute(codeToRun);
+            Expect(result.Item1[0], Is.EqualTo(1), "result was incorrect");
+        }
+
+        [Test]
         public void GroupingTest() {
             var grammar = $"<{Constants.EntryPointSymbolName}> = '0'('1'|'2''3')";
             var codeToRun = "0231";

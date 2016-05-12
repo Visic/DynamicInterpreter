@@ -4,6 +4,7 @@ using System.Linq;
 
 namespace ParserGenerator {
     public static class ParserCodeGenerator {
+        public static string Range(char start, char end) => $"Range({start}, {end})";
         public static string AnyChar() => $"AnyChar()";
         public static string Literal(string value) => $"Literal(\"{value}\")";
         public static string Symbol(string symbolName) => $"FixType(() => SymbolParsers[\"{symbolName}\"])";
@@ -71,6 +72,21 @@ namespace DynamicInterpreter {{
             }};
         }}
 
+        private static Parse Range(char start, char end) {{
+            return (data, charsHandledSoFar, acc, errors) => {{
+                var emptyCheck = CannotBeEmpty(data, charsHandledSoFar, errors);
+                if (emptyCheck.IsSome) return emptyCheck.Value;
+
+                if(Methods.IsBetween_Inclusive(start, end, data[0])) {{
+                    acc.Add(data[0].ToString());
+                    return Tuple.Create(State.Success, data.Substring(1));
+                }} else {{
+                    errors.Add(new Error($""Expected a character in the range [{{start}}-{{end}}]"", charsHandledSoFar));
+                    return Tuple.Create(State.Failure, data);
+                }}
+            }};
+        }}
+
         private static Parse Literal(string value) {{
             return (data, charsHandledSoFar, acc, errors) => {{
                 if(data.StartsWith(value)) {{
@@ -85,13 +101,10 @@ namespace DynamicInterpreter {{
 
         private static Parse AnyChar() {{
             return (data, charsHandledSoFar, acc, errors) => {{
-                if(data.Length > 0) {{
-                    acc.Add(data[0].ToString());
-                    return Tuple.Create(State.Success, data.Substring(1));
-                }} else {{
-                    errors.Add(new Error($""No text to consume"", charsHandledSoFar));
-                    return Tuple.Create(State.Failure, data);
-                }}
+                var emptyCheck = CannotBeEmpty(data, charsHandledSoFar, errors);
+                if (emptyCheck.IsSome) return emptyCheck.Value;
+                acc.Add(data[0].ToString());
+                return Tuple.Create(State.Success, data.Substring(1));
             }};
         }}
 
@@ -158,6 +171,12 @@ namespace DynamicInterpreter {{
 
         private static Func<Parse> FixType(Func<Parse> parse) {{
             return parse;
+        }}
+
+        private static Option<Tuple<State, string>> CannotBeEmpty(string data, int charsHandledSoFar, List<Error> errors) {{
+            if (data.Length > 0) return new None();
+            errors.Add(new Error($""No text to consume"", charsHandledSoFar));
+            return Tuple.Create(State.Failure, data);
         }}
     }}
 }}";
