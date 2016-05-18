@@ -1,0 +1,2 @@
+﻿-Generate an easy to parse file that I can consume in a WPF application who's purpose is to display that file.
+-Make the wpf application to consume the file

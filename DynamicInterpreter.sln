@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestLanguage", "TestLanguag
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ParserGenerator", "ParserGenerator\ParserGenerator.csproj", "{FAC762D9-C4B7-4173-931D-A84D0AC2CC1F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ParserGraphing", "ParserGraphing\ParserGraphing.csproj", "{9E5CAAF7-2E25-4545-8E89-A76BF945BB0B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{FAC762D9-C4B7-4173-931D-A84D0AC2CC1F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FAC762D9-C4B7-4173-931D-A84D0AC2CC1F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FAC762D9-C4B7-4173-931D-A84D0AC2CC1F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9E5CAAF7-2E25-4545-8E89-A76BF945BB0B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9E5CAAF7-2E25-4545-8E89-A76BF945BB0B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9E5CAAF7-2E25-4545-8E89-A76BF945BB0B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9E5CAAF7-2E25-4545-8E89-A76BF945BB0B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
