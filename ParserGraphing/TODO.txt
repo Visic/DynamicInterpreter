@@ -1,2 +1,1 @@
-﻿-Generate an easy to parse file that I can consume in a WPF application who's purpose is to display that file.
--Make the wpf application to consume the file
+﻿Correct the output of this (because of the non-unique nodes that get generated, parse paths look like the connect when they actually don't)

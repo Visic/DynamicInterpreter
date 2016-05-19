@@ -24,9 +24,7 @@ namespace ParserGraphing {
         public string SymbolName { get; } = "literal";
 
         public List<object> Call(List<object> args) {
-            var nodeName = (string)args[1];
-            GraphHelper.AddNode(nodeName);
-            return new List<object> { nodeName };
+            return new List<object> { (string)args[1] };
         }
     }
 
@@ -34,9 +32,7 @@ namespace ParserGraphing {
         public string SymbolName { get; } = "symbol";
 
         public List<object> Call(List<object> args) {
-            var nodeName = (string)args[1];
-            GraphHelper.AddNode(nodeName);
-            return new List<object> { nodeName };
+            return new List<object> { (string)args[1] };
         }
     }
 
@@ -44,7 +40,6 @@ namespace ParserGraphing {
         public string SymbolName { get; } = "anychar";
 
         public List<object> Call(List<object> args) {
-            GraphHelper.AddNode("*");
             return new List<object> { "*" };
         }
     }
@@ -54,7 +49,6 @@ namespace ParserGraphing {
 
         public List<object> Call(List<object> args) {
             var nodeName = $"[{((string)args[1])[0]} - {((string)args[3])[0]}]";
-            GraphHelper.AddNode(nodeName);
             return new List<object> { nodeName };
         }
     }
@@ -75,18 +69,31 @@ namespace ParserGraphing {
             for(int i = 0; i < args.Count - 1; ++i) {
                 GraphHelper.AddEdge((string)args[i], (string)args[i + 1]);
             }
-            return new List<object> { };
+            return args;
         }
     }
 
-    //public class AnyHandler : ISymbolHandler {
-    //    public string SymbolName { get; } = "all_any";
+    public class AnyHandler : ISymbolHandler {
+        public string SymbolName { get; } = "all_any";
 
-    //    public List<object> Call(List<object> args) {
-    //        if(args.Count == 1) return args;
-    //        return new List<object> { ParserCodeGenerator.Any(args.Where(x => (string)x != "|").Cast<string>()) };
-    //    }
-    //}
+        public List<object> Call(List<object> args) {
+            var nodes = args.Split(x => (string)x == "|").ToArray();
+            foreach(var ele in nodes) {
+                GraphHelper.AddNode((string)ele.Last());
+                GraphHelper.AddEdge((string)ele.Last(), "''");
+            }
+            return nodes.Select(x => x.First()).ToList();
+        }
+    }
+
+    public class AssignmentHandler : ISymbolHandler {
+        public string SymbolName { get; } = "assignment";
+
+        public List<object> Call(List<object> args) {
+            var newSymbolName = (string)args[1];
+            return new List<object> { };
+        }
+    }
 
     //public class NegationHandler : ISymbolHandler {
     //    public string SymbolName { get; } = "negation";

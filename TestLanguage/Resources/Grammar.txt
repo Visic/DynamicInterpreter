@@ -21,4 +21,4 @@
 <funcname> = -<keyword><allchars_notwhitespace>
 
 <add> = <integer>(''|<ignore_whitespace>)'+'(''|<ignore_whitespace>)<integer>
-<EntryPoint> = <add>|<blockcomment>|<funcname>|<keyword>
+<EntryPoint> = <add>
