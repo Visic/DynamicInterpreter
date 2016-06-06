@@ -97,7 +97,9 @@ namespace ParserGenerator {
         public string SymbolName { get; } = "EntryPoint";
 
         public List<object> Call(List<object> args) {
-            File.WriteAllText("Parser.cs", ParserCodeGenerator.EntryPoint(args.Cast<string>()));
+            var fileContents = ParserCodeGenerator.EntryPoint(args.Cast<string>());
+            File.WriteAllText("Parser_NoEdit.cs", fileContents[0]);
+            File.WriteAllText("Parser_Edit.cs", fileContents[1]);
             return new List<object>();
         }
     }

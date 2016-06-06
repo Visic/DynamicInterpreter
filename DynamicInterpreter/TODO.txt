@@ -1,11 +1,12 @@
 ﻿--Consider adding "rules" or "tostring" to allow the parser to work on any data, not just strings
 --less verbose error feedback
+--Optimization
+	--Evaluate the performance of the generated parsers and optimize if needed
+	--Either memoize results so that repeated runs of the same parser on the same input become constant time operations
+			--and/or
+	--Reduce and optimize the grammar so there is little to no duplication of symbols (decision tree?)
+		--e.g  <a>='1''2'|'1''3' should be parsed as  '1' followed by any '2'|'3'
+	--Try to eliminate the need for recursion
 
 --Working on
-	--Optimization
-		--Evaluate the performance of the generated parsers and optimize if needed
-		--Either memoize results so that repeated runs of the same parser on the same input become constant time operations
-				--and/or
-		--Reduce and optimize the grammar so there is little to no duplication of symbols (decision tree?)
-			--e.g  <a>='1''2'|'1''3' should be parsed as  '1' followed by any '2'|'3'
-		--Try to eliminate the need for recursion
+	--Let REPL handle newlines in content (how should we mark the end of content?)

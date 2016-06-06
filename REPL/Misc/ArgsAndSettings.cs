@@ -51,7 +51,7 @@ namespace REPL {
 
             var interp = new Interpreter();
             interp.Setup(
-                Parser.GenerateParser(Resources.CommandlineGrammar).Item1, //safe to ignore errors unless I decide to change the commandline parser definition
+                Parser.Execute(Resources.CommandlineGrammar).Item1, //safe to ignore errors unless I decide to change the commandline parser definition
                 entryHandler,
                 argHandler,
                 argNameHandler,

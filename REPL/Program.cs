@@ -22,7 +22,7 @@ namespace REPL {
 
             var commandHandler = new GenericSymbolHandler("command", CallREPLCommand);
             _commandInterp.Setup(
-                Parser.GenerateParser(Resources.REPLCommandGrammar).Item1, //safe to ignore errors unless I decide to change the repl command parser definition
+                Parser.Execute(Resources.REPLCommandGrammar).Item1, //safe to ignore errors unless I decide to change the repl command parser definition
                 new CombineToStringSymbolHandler("arg"),
                 new CombineToStringSymbolHandler("cmdname"),
                 commandHandler

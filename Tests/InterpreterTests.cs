@@ -23,7 +23,7 @@ namespace Tests {
             var codeToRun = "1";
             var addHandler = Handler.Create(Constants.EntryPointSymbolName, args => int.Parse(args.ToDelimitedString("")));
             var interp = new Interpreter();
-            var results = Parser.GenerateParser(grammar);
+            var results = Parser.Execute(grammar);
             Expect(results.Item2, Is.Empty);
             interp.Setup(results.Item1, addHandler);
 
@@ -37,7 +37,7 @@ namespace Tests {
             var codeToRun = "1";
             var addHandler = Handler.Create(Constants.EntryPointSymbolName, args => int.Parse(args.ToDelimitedString("")));
             var interp = new Interpreter();
-            var results = Parser.GenerateParser(grammar);
+            var results = Parser.Execute(grammar);
             Expect(results.Item2, Is.Empty);
             interp.Setup(results.Item1, addHandler);
 
@@ -50,7 +50,7 @@ namespace Tests {
             var grammar = $"<{Constants.EntryPointSymbolName}> = '0'('1'|'2''3')";
             var codeToRun = "0231";
             var interp = new Interpreter();
-            var results = Parser.GenerateParser(grammar);
+            var results = Parser.Execute(grammar);
             Expect(results.Item2, Is.Empty);
             interp.Setup(results.Item1, new CombineToStringSymbolHandler(Constants.EntryPointSymbolName));
 
@@ -68,7 +68,7 @@ namespace Tests {
                              <{Constants.EntryPointSymbolName}> = <name>|<keyword>";
             var codeToRun = "abca";
             var interp = new Interpreter();
-            var results = Parser.GenerateParser(grammar);
+            var results = Parser.Execute(grammar);
             Expect(results.Item2, Is.Empty);
             interp.Setup(results.Item1, new CombineToStringSymbolHandler("keyword"));
 
@@ -81,7 +81,7 @@ namespace Tests {
             var grammar = $"<EntryPoint> = -(-'1')'1'";
             var codeToRun = "11";
             var interp = new Interpreter();
-            var results = Parser.GenerateParser(grammar);
+            var results = Parser.Execute(grammar);
             Expect(results.Item2, Is.Empty);
             interp.Setup(results.Item1, new CombineToStringSymbolHandler(Constants.EntryPointSymbolName));
 
@@ -94,7 +94,7 @@ namespace Tests {
             var grammar = $"<{Constants.EntryPointSymbolName}> = '\\12'";
             var codeToRun = @"\12";
             var interp = new Interpreter();
-            var results = Parser.GenerateParser(grammar);
+            var results = Parser.Execute(grammar);
             Expect(results.Item2, Is.Empty);
             interp.Setup(results.Item1, new CombineToStringSymbolHandler(Constants.EntryPointSymbolName));
 
@@ -107,7 +107,7 @@ namespace Tests {
             var grammar = $"<{Constants.EntryPointSymbolName}> = '\"123\"'";
             var codeToRun = "\"123\"";
             var interp = new Interpreter();
-            var results = Parser.GenerateParser(grammar);
+            var results = Parser.Execute(grammar);
             Expect(results.Item2, Is.Empty);
             interp.Setup(results.Item1, new CombineToStringSymbolHandler(Constants.EntryPointSymbolName));
 
@@ -120,7 +120,7 @@ namespace Tests {
             var grammar = $"<{Constants.EntryPointSymbolName}> = 'C:\\test'";
             var codeToRun = "C:\\test";
             var interp = new Interpreter();
-            var results = Parser.GenerateParser(grammar);
+            var results = Parser.Execute(grammar);
             Expect(results.Item2, Is.Empty);
             interp.Setup(results.Item1, new CombineToStringSymbolHandler(Constants.EntryPointSymbolName));
 
@@ -133,7 +133,7 @@ namespace Tests {
             var grammar = $"<{Constants.EntryPointSymbolName}> = ''";
             var codeToRun = "1";
             var interp = new Interpreter();
-            var results = Parser.GenerateParser(grammar);
+            var results = Parser.Execute(grammar);
             Expect(results.Item2, Is.Empty);
             interp.Setup(results.Item1, new CombineToStringSymbolHandler(Constants.EntryPointSymbolName));
 
@@ -146,7 +146,7 @@ namespace Tests {
             var grammar = $"<{Constants.EntryPointSymbolName}> = -'''1'";
             var codeToRun = "1";
             var interp = new Interpreter();
-            var results = Parser.GenerateParser(grammar);
+            var results = Parser.Execute(grammar);
             Expect(results.Item2, Is.Empty);
             interp.Setup(results.Item1, new CombineToStringSymbolHandler(Constants.EntryPointSymbolName));
 
@@ -160,7 +160,7 @@ namespace Tests {
             var codeToRun = "111";
             var entryHandler = Handler.Create(Constants.EntryPointSymbolName, args => int.Parse(args.ToDelimitedString("")));
             var interp = new Interpreter();
-            var results = Parser.GenerateParser(grammar);
+            var results = Parser.Execute(grammar);
             Expect(results.Item2, Is.Empty);
             interp.Setup(results.Item1, entryHandler);
 
@@ -176,7 +176,7 @@ namespace Tests {
             var entryHandler = Handler.Create(Constants.EntryPointSymbolName, args => args.ToDelimitedString(""));
             var aHandler = Handler.Create("a", args => args.ToDelimitedString(""));
             var interp = new Interpreter();
-            var results = Parser.GenerateParser(grammar);
+            var results = Parser.Execute(grammar);
             Expect(results.Item2, Is.Empty);
             interp.Setup(results.Item1, entryHandler, aHandler);
 
@@ -195,7 +195,7 @@ namespace Tests {
             var digitHandler = Handler.Create("digit", args => int.Parse(args.First().ToString()));
             var addHandler = Handler.Create("add", args => args.Select(x => x.ToString() == "+" ? 0 : (int)x).Sum());
             var interp = new Interpreter();
-            var results = Parser.GenerateParser(grammar);
+            var results = Parser.Execute(grammar);
             Expect(results.Item2, Is.Empty);
             interp.Setup(results.Item1, entryHandler, digitHandler, addHandler);
 
@@ -214,7 +214,7 @@ namespace Tests {
             var codeToRun = "123abc";
             var entryHandler = Handler.Create(Constants.EntryPointSymbolName, args => args);
             var interp = new Interpreter();
-            var results = Parser.GenerateParser(grammar);
+            var results = Parser.Execute(grammar);
             Expect(results.Item2, Is.Empty);
             interp.Setup(results.Item1, entryHandler);
 

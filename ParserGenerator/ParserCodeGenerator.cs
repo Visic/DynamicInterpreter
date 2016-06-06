@@ -7,7 +7,7 @@ namespace ParserGenerator {
         public static string Range(char start, char end) => $"Range({start}, {end})";
         public static string AnyChar() => $"AnyChar()";
         public static string Literal(string value) => $"Literal(\"{value}\")";
-        public static string Symbol(string symbolName) => $"FixType(() => SymbolParsers[\"{symbolName}\"])";
+        public static string Symbol(string symbolName) => $"FixType(() => _symbolParsers[\"{symbolName}\"])";
         public static string Negate(string parserToNegate) => $"Negate({parserToNegate})";
         public static string InOrder(IEnumerable<string> parsers) => $"InOrder({string.Join(", ", parsers)})";
         public static string Any(IEnumerable<string> parsers) => $"Any({string.Join(", ", parsers)})";
@@ -18,15 +18,16 @@ namespace ParserGenerator {
             return allAssignments.Select(x => $"{{\"{x.Item1}\", {x.Item2}}}");
         }
 
-        public static string EntryPoint(IEnumerable<string> allAssignments) {
-            return
-$@"using System;
+        public static string[] EntryPoint(IEnumerable<string> allAssignments) {
+            return new[] {
+$@"//AUTO-GENERATED - Dynamic Interpreter (by Andrew Frailing  https://github.com/Visic)
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Utility;
 
 namespace DynamicInterpreter {{
-    public static class Parser {{
+    public static partial class Parser {{
         public class Error {{
             public Error(string message, int characterIndex) {{
                 Message = message;
@@ -50,9 +51,18 @@ namespace DynamicInterpreter {{
         public class Result : List<Union<string, Tuple<string, Result>>> {{ }}
         public delegate Tuple<State, string, int> Parse(string data, int charsHandledSoFar, Result acc, List<Error> errors);
 
-        public static IReadOnlyDictionary<string, Parse> SymbolParsers = new Dictionary<string, Parse>() {{
+        static Interpreter _interpreter = new Interpreter();
+        static IReadOnlyDictionary<string, Parse> _symbolParsers = new Dictionary<string, Parse>() {{
             {string.Join(",\n\t\t\t", allAssignments.ToArray())}
         }};
+
+        static Parser() {{
+            _interpreter.Setup(_symbolParsers[""EntryPoint""], _symbolHandlers);
+        }}
+
+        public static Tuple<List<object>, List<Error>> Execute(string code) {{
+            return _interpreter.Execute(code);
+        }}
 
         private static Parse Symbol(string symbolName, Union<Parse, Func<Parse>> parser) {{
             return (data, charsHandledSoFar, acc, errors) => {{
@@ -112,7 +122,7 @@ namespace DynamicInterpreter {{
             return (data, charsHandledSoFar, acc, errors) => {{
                 var result = Eval(parserToNegate)(data, charsHandledSoFar, new Result(), new List<Error>());
                 if(result.Item1 == State.Success) return Tuple.Create(State.Failure, data, charsHandledSoFar);
-                return Tuple.Create(State.Success, data, charsHandledSoFar); //TODO:: charsHandledSoFar + ??
+                return Tuple.Create(State.Success, data, charsHandledSoFar);
             }};
         }}
 
@@ -178,7 +188,24 @@ namespace DynamicInterpreter {{
             return Tuple.Create(State.Failure, data, charsHandledSoFar);
         }}
     }}
-}}";
+}}",
+$@"//AUTO-GENERATED - Dynamic Interpreter (by Andrew Frailing  https://github.com/Visic)
+using System;
+using System.Linq;
+using System.Collections.Generic;
+using Utility;
+
+namespace DynamicInterpreter {{
+    public static partial class Parser {{
+        static ISymbolHandler[] _symbolHandlers = new ISymbolHandler[] {{
+            //////ADD HANDLERS HERE//////
+            //new GenericSymbolHandler("""", args => {{
+            //        return args;
+            //}}),
+            //////ADD HANDLERS HERE//////
+        }};
+    }}
+}}" };
         }
     }
 }

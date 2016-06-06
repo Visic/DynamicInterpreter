@@ -1,3 +1,4 @@
+//AUTO-GENERATED - Dynamic Interpreter (by Andrew Frailing  https://github.com/Visic)
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +12,7 @@ namespace DynamicInterpreter {
                 CharacterIndex = characterIndex;
             }
 
-            public Error(string message, List<Error> subErrors, int characterIndex) : this(message, characterIndex) {
+            public Error(string message, List<Error> subErrors, int characterIndex) : this (message, characterIndex) {
                 SubErrors = subErrors;
             }
 
@@ -28,32 +29,42 @@ namespace DynamicInterpreter {
         public class Result : List<Union<string, Tuple<string, Result>>> { }
         public delegate Tuple<State, string, int> Parse(string data, int charsHandledSoFar, Result acc, List<Error> errors);
 
-        public static IReadOnlyDictionary<string, Parse> SymbolParsers = new Dictionary<string, Parse>() {
+        static Interpreter _interpreter = new Interpreter();
+        static IReadOnlyDictionary<string, Parse> _symbolParsers = new Dictionary<string, Parse>() {
             {"whitespace", Symbol("whitespace", Any(Literal(" "), Literal("\t"), Literal("\r\n"), Literal("\n")))},
-            {"escaped", Symbol("escaped", Any(InOrder(Literal("\\"), Negate(Literal("\\"))), InOrder(Literal("\\\\"), FixType(() => SymbolParsers["escaped"]))))},
-            {"all_escape_chars", Symbol("all_escape_chars", Any(Literal("\\"), InOrder(Literal("\\"), FixType(() => SymbolParsers["all_escape_chars"]))))},
-            {"almost_all_escape_chars", Symbol("almost_all_escape_chars", Any(InOrder(Literal("\\"), Negate(Negate(Literal("\\")))), InOrder(Literal("\\"), FixType(() => SymbolParsers["almost_all_escape_chars"]))))},
-            {"all_whitespace", Symbol("all_whitespace", Any(FixType(() => SymbolParsers["whitespace"]), InOrder(FixType(() => SymbolParsers["whitespace"]), FixType(() => SymbolParsers["all_whitespace"]))))},
-            {"ignore_all_whitespace", Symbol("ignore_all_whitespace", Any(Literal(""), FixType(() => SymbolParsers["all_whitespace"])))},
-            {"anychar", Symbol("anychar", Literal("*"))},
-            {"range", Symbol("range", InOrder(Literal("["), Any(Literal("\\]"), Literal("\\-"), InOrder(Negate(Any(Literal("-"), Literal("]"))), AnyChar())), Literal("-"), Any(Literal("\\]"), Literal("\\-"), InOrder(Negate(Any(Literal("-"), Literal("]"))), AnyChar())), Literal("]")))},
-            {"allchars_not_quote", Symbol("allchars_not_quote", InOrder(Negate(Any(Literal("'"), InOrder(FixType(() => SymbolParsers["escaped"]), FixType(() => SymbolParsers["almost_all_escape_chars"]), Literal("\\'")))), Any(InOrder(Negate(Negate(FixType(() => SymbolParsers["escaped"]))), FixType(() => SymbolParsers["all_escape_chars"]), AnyChar()), InOrder(Negate(FixType(() => SymbolParsers["escaped"])), FixType(() => SymbolParsers["all_escape_chars"])), AnyChar()), Any(Literal(""), FixType(() => SymbolParsers["allchars_not_quote"]))))},
-            {"literal", Symbol("literal", InOrder(Literal("'"), Any(Literal(""), FixType(() => SymbolParsers["allchars_not_quote"])), Literal("'")))},
-            {"allchars_not_gt", Symbol("allchars_not_gt", InOrder(Negate(Any(Literal(">"), InOrder(FixType(() => SymbolParsers["escaped"]), FixType(() => SymbolParsers["almost_all_escape_chars"]), Literal("\\>")))), Any(InOrder(Negate(Negate(FixType(() => SymbolParsers["escaped"]))), FixType(() => SymbolParsers["all_escape_chars"]), AnyChar()), InOrder(Negate(FixType(() => SymbolParsers["escaped"])), FixType(() => SymbolParsers["all_escape_chars"])), AnyChar()), Any(Literal(""), FixType(() => SymbolParsers["allchars_not_gt"]))))},
-            {"symbol", Symbol("symbol", InOrder(Literal("<"), FixType(() => SymbolParsers["allchars_not_gt"]), Literal(">")))},
-            {"inorder_ele", Symbol("inorder_ele", InOrder(FixType(() => SymbolParsers["ignore_all_whitespace"]), Any(InOrder(FixType(() => SymbolParsers["symbol"]), FixType(() => SymbolParsers["ignore_all_whitespace"]), Negate(Literal("="))), FixType(() => SymbolParsers["literal"]), FixType(() => SymbolParsers["group"]), FixType(() => SymbolParsers["negation"]), FixType(() => SymbolParsers["anychar"]), FixType(() => SymbolParsers["range"]))))},
-            {"inorder", Symbol("inorder", Any(FixType(() => SymbolParsers["inorder_ele"]), InOrder(FixType(() => SymbolParsers["inorder_ele"]), FixType(() => SymbolParsers["inorder"]))))},
-            {"all_inorder", Symbol("all_inorder", FixType(() => SymbolParsers["inorder"]))},
-            {"any", Symbol("any", Any(FixType(() => SymbolParsers["all_inorder"]), InOrder(FixType(() => SymbolParsers["all_inorder"]), Literal("|"), FixType(() => SymbolParsers["any"]))))},
-            {"all_any", Symbol("all_any", FixType(() => SymbolParsers["any"]))},
-            {"group", Symbol("group", InOrder(Literal("("), FixType(() => SymbolParsers["all_any"]), FixType(() => SymbolParsers["ignore_all_whitespace"]), Literal(")")))},
-            {"negation", Symbol("negation", InOrder(Literal("-"), Any(FixType(() => SymbolParsers["group"]), FixType(() => SymbolParsers["symbol"]), FixType(() => SymbolParsers["literal"]), FixType(() => SymbolParsers["negation"]), FixType(() => SymbolParsers["range"]), FixType(() => SymbolParsers["anychar"]))))},
-            {"assignment", Symbol("assignment", InOrder(FixType(() => SymbolParsers["ignore_all_whitespace"]), Literal("<"), FixType(() => SymbolParsers["allchars_not_gt"]), Literal(">"), FixType(() => SymbolParsers["ignore_all_whitespace"]), Literal("="), FixType(() => SymbolParsers["all_any"]), FixType(() => SymbolParsers["ignore_all_whitespace"])))},
-            {"fallback_point", Symbol("fallback_point", InOrder(Literal("f"), FixType(() => SymbolParsers["assignment"])))},
-            {"all_assignments", FallbackPoint(Symbol("all_assignments", InOrder(Any(FixType(() => SymbolParsers["assignment"]), FixType(() => SymbolParsers["fallback_point"])), Any(Literal(""), FixType(() => SymbolParsers["all_assignments"])))))},
-            {"all_all_assignments", Symbol("all_all_assignments", FixType(() => SymbolParsers["all_assignments"]))},
-            {"EntryPoint", Symbol("EntryPoint", FixType(() => SymbolParsers["all_all_assignments"]))}
+			{"escaped", Symbol("escaped", Any(InOrder(Literal("\\"), Negate(Literal("\\"))), InOrder(Literal("\\\\"), FixType(() => _symbolParsers["escaped"]))))},
+			{"all_escape_chars", Symbol("all_escape_chars", Any(Literal("\\"), InOrder(Literal("\\"), FixType(() => _symbolParsers["all_escape_chars"]))))},
+			{"almost_all_escape_chars", Symbol("almost_all_escape_chars", Any(InOrder(Literal("\\"), Negate(Negate(Literal("\\")))), InOrder(Literal("\\"), FixType(() => _symbolParsers["almost_all_escape_chars"]))))},
+			{"all_whitespace", Symbol("all_whitespace", Any(FixType(() => _symbolParsers["whitespace"]), InOrder(FixType(() => _symbolParsers["whitespace"]), FixType(() => _symbolParsers["all_whitespace"]))))},
+			{"ignore_all_whitespace", Symbol("ignore_all_whitespace", Any(Literal(""), FixType(() => _symbolParsers["all_whitespace"])))},
+			{"anychar", Symbol("anychar", Literal("*"))},
+			{"range", Symbol("range", InOrder(Literal("["), Any(Literal("\\]"), Literal("\\-"), InOrder(Negate(Any(Literal("-"), Literal("]"))), AnyChar())), Literal("-"), Any(Literal("\\]"), Literal("\\-"), InOrder(Negate(Any(Literal("-"), Literal("]"))), AnyChar())), Literal("]")))},
+			{"allchars_not_quote", Symbol("allchars_not_quote", InOrder(Negate(Any(Literal("'"), InOrder(FixType(() => _symbolParsers["escaped"]), FixType(() => _symbolParsers["almost_all_escape_chars"]), Literal("\\'")))), Any(InOrder(Negate(Negate(FixType(() => _symbolParsers["escaped"]))), FixType(() => _symbolParsers["all_escape_chars"]), AnyChar()), InOrder(Negate(FixType(() => _symbolParsers["escaped"])), FixType(() => _symbolParsers["all_escape_chars"])), AnyChar()), Any(Literal(""), FixType(() => _symbolParsers["allchars_not_quote"]))))},
+			{"literal", Symbol("literal", InOrder(Literal("'"), Any(Literal(""), FixType(() => _symbolParsers["allchars_not_quote"])), Literal("'")))},
+			{"allchars_not_gt", Symbol("allchars_not_gt", InOrder(Negate(Any(Literal(">"), InOrder(FixType(() => _symbolParsers["escaped"]), FixType(() => _symbolParsers["almost_all_escape_chars"]), Literal("\\>")))), Any(InOrder(Negate(Negate(FixType(() => _symbolParsers["escaped"]))), FixType(() => _symbolParsers["all_escape_chars"]), AnyChar()), InOrder(Negate(FixType(() => _symbolParsers["escaped"])), FixType(() => _symbolParsers["all_escape_chars"])), AnyChar()), Any(Literal(""), FixType(() => _symbolParsers["allchars_not_gt"]))))},
+			{"symbol", Symbol("symbol", InOrder(Literal("<"), FixType(() => _symbolParsers["allchars_not_gt"]), Literal(">")))},
+			{"inorder_ele", Symbol("inorder_ele", InOrder(FixType(() => _symbolParsers["ignore_all_whitespace"]), Any(InOrder(FixType(() => _symbolParsers["symbol"]), FixType(() => _symbolParsers["ignore_all_whitespace"]), Negate(Literal("="))), FixType(() => _symbolParsers["literal"]), FixType(() => _symbolParsers["group"]), FixType(() => _symbolParsers["negation"]), FixType(() => _symbolParsers["anychar"]), FixType(() => _symbolParsers["range"]))))},
+			{"inorder", Symbol("inorder", Any(FixType(() => _symbolParsers["inorder_ele"]), InOrder(FixType(() => _symbolParsers["inorder_ele"]), FixType(() => _symbolParsers["inorder"]))))},
+			{"all_inorder", Symbol("all_inorder", FixType(() => _symbolParsers["inorder"]))},
+			{"any", Symbol("any", Any(FixType(() => _symbolParsers["all_inorder"]), InOrder(FixType(() => _symbolParsers["all_inorder"]), Literal("|"), FixType(() => _symbolParsers["any"]))))},
+			{"all_any", Symbol("all_any", FixType(() => _symbolParsers["any"]))},
+			{"group", Symbol("group", InOrder(Literal("("), FixType(() => _symbolParsers["all_any"]), FixType(() => _symbolParsers["ignore_all_whitespace"]), Literal(")")))},
+			{"negation", Symbol("negation", InOrder(Literal("-"), Any(FixType(() => _symbolParsers["group"]), FixType(() => _symbolParsers["symbol"]), FixType(() => _symbolParsers["literal"]), FixType(() => _symbolParsers["negation"]), FixType(() => _symbolParsers["range"]), FixType(() => _symbolParsers["anychar"]))))},
+			{"assignment", Symbol("assignment", InOrder(FixType(() => _symbolParsers["ignore_all_whitespace"]), Literal("<"), FixType(() => _symbolParsers["allchars_not_gt"]), Literal(">"), FixType(() => _symbolParsers["ignore_all_whitespace"]), Literal("="), FixType(() => _symbolParsers["all_any"]), FixType(() => _symbolParsers["ignore_all_whitespace"])))},
+			{"fallback_point", Symbol("fallback_point", InOrder(Literal("f"), FixType(() => _symbolParsers["assignment"])))},
+			{"all_assignments", FallbackPoint(Symbol("all_assignments", InOrder(Any(FixType(() => _symbolParsers["assignment"]), FixType(() => _symbolParsers["fallback_point"])), Any(Literal(""), FixType(() => _symbolParsers["all_assignments"])))))},
+			{"all_all_assignments", Symbol("all_all_assignments", FixType(() => _symbolParsers["all_assignments"]))},
+			{"EntryPoint", Symbol("EntryPoint", FixType(() => _symbolParsers["all_all_assignments"]))}
         };
+
+        static Parser() {
+            _interpreter.Setup(_symbolParsers["EntryPoint"], _symbolHandlers);
+        }
+
+        public static Tuple<Parse, List<Error>> Execute(string description) {
+            var results = _interpreter.Execute(description);
+            return Tuple.Create(Eval((Union<Parse, Func<Parse>>)results.Item1[0]), results.Item2);
+        }
 
         private static Parse Symbol(string symbolName, Union<Parse, Func<Parse>> parser) {
             return (data, charsHandledSoFar, acc, errors) => {
@@ -113,7 +124,7 @@ namespace DynamicInterpreter {
             return (data, charsHandledSoFar, acc, errors) => {
                 var result = Eval(parserToNegate)(data, charsHandledSoFar, new Result(), new List<Error>());
                 if(result.Item1 == State.Success) return Tuple.Create(State.Failure, data, charsHandledSoFar);
-                return Tuple.Create(State.Success, data, charsHandledSoFar); //TODO:: charsHandledSoFar + ??
+                return Tuple.Create(State.Success, data, charsHandledSoFar);
             };
         }
 
