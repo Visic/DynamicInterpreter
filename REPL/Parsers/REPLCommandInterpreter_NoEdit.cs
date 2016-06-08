@@ -2,10 +2,9 @@
 using System;
 using System.Linq;
 using System.Collections.Generic;
-using Utility;
 
 namespace DynamicInterpreter {
-    public static partial class REPLCommandParser {
+    public static partial class REPLCommandInterpreter {
         static IReadOnlyDictionary<string, Parse> _symbolParsers = new Dictionary<string, Parse>() {
             {"uppercase", Parser.Symbol("uppercase", Parser.Any(Parser.Literal("A"), Parser.Literal("B"), Parser.Literal("C"), Parser.Literal("D"), Parser.Literal("E"), Parser.Literal("F"), Parser.Literal("G"), Parser.Literal("H"), Parser.Literal("I"), Parser.Literal("J"), Parser.Literal("K"), Parser.Literal("L"), Parser.Literal("M"), Parser.Literal("N"), Parser.Literal("O"), Parser.Literal("P"), Parser.Literal("Q"), Parser.Literal("R"), Parser.Literal("S"), Parser.Literal("T"), Parser.Literal("U"), Parser.Literal("V"), Parser.Literal("W"), Parser.Literal("X"), Parser.Literal("Y"), Parser.Literal("Z")))},
 			{"lowercase", Parser.Symbol("lowercase", Parser.Any(Parser.Literal("a"), Parser.Literal("b"), Parser.Literal("c"), Parser.Literal("d"), Parser.Literal("e"), Parser.Literal("f"), Parser.Literal("g"), Parser.Literal("h"), Parser.Literal("i"), Parser.Literal("j"), Parser.Literal("k"), Parser.Literal("l"), Parser.Literal("m"), Parser.Literal("n"), Parser.Literal("o"), Parser.Literal("p"), Parser.Literal("q"), Parser.Literal("r"), Parser.Literal("s"), Parser.Literal("t"), Parser.Literal("u"), Parser.Literal("v"), Parser.Literal("w"), Parser.Literal("x"), Parser.Literal("y"), Parser.Literal("z")))},
@@ -29,7 +28,7 @@ namespace DynamicInterpreter {
             var parserResult = new Result();
             var errors = new List<Error>();
             _symbolParsers["EntryPoint"](code, 0, parserResult, errors);
-            return Tuple.Create(Parser.RecursiveEval(parserResult, _symbolHandlers.ToDictionary(x => x.SymbolName)), errors);
+            return Tuple.Create(Interpreter.RecursiveEval(parserResult, _symbolHandlers.ToDictionary(x => x.SymbolName)), errors);
         }
     }
 }

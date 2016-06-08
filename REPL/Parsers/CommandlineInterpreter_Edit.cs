@@ -2,11 +2,11 @@
 using System;
 using System.Linq;
 using System.Collections.Generic;
-using Utility;
 using REPL;
+using Utility;
 
 namespace DynamicInterpreter {
-    public static partial class CommandlineParser {
+    public static partial class CommandlineInterpreter {
         static ISymbolHandler[] _symbolHandlers = new ISymbolHandler[] {
             //////ADD HANDLERS HERE//////
             new CombineToStringSymbolHandler("argname"),

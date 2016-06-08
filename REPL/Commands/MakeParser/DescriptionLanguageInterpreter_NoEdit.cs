@@ -2,10 +2,9 @@
 using System;
 using System.Linq;
 using System.Collections.Generic;
-using Utility;
 
 namespace DynamicInterpreter {
-    public static partial class LoadLanguageParser {
+    public static partial class DescriptionLanguageInterpreter {
         static IReadOnlyDictionary<string, Parse> _symbolParsers = new Dictionary<string, Parse>() {
             {"whitespace", Parser.Symbol("whitespace", Parser.Any(Parser.Literal(" "), Parser.Literal("\t"), Parser.Literal("\r\n"), Parser.Literal("\n")))},
 			{"escaped", Parser.Symbol("escaped", Parser.Any(Parser.InOrder(Parser.Literal("\\"), Parser.Negate(Parser.Literal("\\"))), Parser.InOrder(Parser.Literal("\\\\"), Parser.FixType(() => _symbolParsers["escaped"]))))},
@@ -32,5 +31,12 @@ namespace DynamicInterpreter {
 			{"all_all_assignments", Parser.Symbol("all_all_assignments", Parser.FixType(() => _symbolParsers["all_assignments"]))},
 			{"EntryPoint", Parser.Symbol("EntryPoint", Parser.FixType(() => _symbolParsers["all_all_assignments"]))}
         };
+
+        public static Tuple<List<object>, List<Error>> Execute(string code) {
+            var parserResult = new Result();
+            var errors = new List<Error>();
+            _symbolParsers["EntryPoint"](code, 0, parserResult, errors);
+            return Tuple.Create(Interpreter.RecursiveEval(parserResult, _symbolHandlers.ToDictionary(x => x.SymbolName)), errors);
+        }
     }
 }

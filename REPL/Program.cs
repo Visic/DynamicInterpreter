@@ -19,7 +19,7 @@ namespace REPL {
             Console.Clear();
 
             while(true) { //handle switching prompts
-                Prompt(Constants.ReplPromptName, x => { REPLCommandParser.Execute(x); }, _cmdBuffer);
+                Prompt(Constants.ReplPromptName, x => { REPLCommandInterpreter.Execute(x); }, _cmdBuffer);
                 Prompt(LanguageName, x => {
                     if(_languageInterp != null) {
                         var results = _languageInterp(x);

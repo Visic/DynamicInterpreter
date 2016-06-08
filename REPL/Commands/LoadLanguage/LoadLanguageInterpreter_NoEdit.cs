@@ -4,7 +4,7 @@ using System.Linq;
 using System.Collections.Generic;
 
 namespace DynamicInterpreter {
-    public static partial class DescriptionLanguageParser {
+    public static partial class LoadLanguageInterpreter {
         static IReadOnlyDictionary<string, Parse> _symbolParsers = new Dictionary<string, Parse>() {
             {"whitespace", Parser.Symbol("whitespace", Parser.Any(Parser.Literal(" "), Parser.Literal("\t"), Parser.Literal("\r\n"), Parser.Literal("\n")))},
 			{"escaped", Parser.Symbol("escaped", Parser.Any(Parser.InOrder(Parser.Literal("\\"), Parser.Negate(Parser.Literal("\\"))), Parser.InOrder(Parser.Literal("\\\\"), Parser.FixType(() => _symbolParsers["escaped"]))))},
@@ -36,7 +36,7 @@ namespace DynamicInterpreter {
             var parserResult = new Result();
             var errors = new List<Error>();
             _symbolParsers["EntryPoint"](code, 0, parserResult, errors);
-            return Tuple.Create(Parser.RecursiveEval(parserResult, _symbolHandlers.ToDictionary(x => x.SymbolName)), errors);
+            return Tuple.Create(Interpreter.RecursiveEval(parserResult, _symbolHandlers.ToDictionary(x => x.SymbolName)), errors);
         }
     }
 }

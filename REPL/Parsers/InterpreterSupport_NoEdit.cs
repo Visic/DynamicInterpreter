@@ -56,8 +56,8 @@ namespace DynamicInterpreter {
     public delegate Tuple<State, string, int> Parse(string data, int charsHandledSoFar, Result acc, List<Error> errors);
     #endregion
 
-    #region Parse methods and helper functions
-    public static class Parser {
+    #region Interpreter methods and helper functions
+    public static class Interpreter {
         public static List<object> RecursiveEval(Result result, Dictionary<string, ISymbolHandler> handlers) {
             return result.SelectMany(
                 x => x.Match<List<object>>(
@@ -69,7 +69,11 @@ namespace DynamicInterpreter {
                 )
             ).ToList();
         }
+    }
+    #endregion
 
+    #region Parse methods and helper functions
+    public static class Parser {
         public static Parse Symbol(string symbolName, Union<Parse, Func<Parse>> parser) {
             return (data, charsHandledSoFar, acc, errors) => {
                 var newAcc = new Result();

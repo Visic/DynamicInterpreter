@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace REPL.MakeParser {
-    public static class ParserCodeGenerator {
-        public static string ParserName { get; set; }
+namespace REPL.MakeInterpreter {
+    public static class InterpreterCodeGenerator {
+        public static string LanguageName { get; set; }
 
         public static string Range(char start, char end) => $"Parser.Range({start}, {end})";
         public static string AnyChar() => $"Parser.AnyChar()";
@@ -28,7 +28,7 @@ using System.Linq;
 using System.Collections.Generic;
 
 namespace DynamicInterpreter {{
-    public static partial class {ParserName}Parser {{
+    public static partial class {LanguageName}Interpreter {{
         static IReadOnlyDictionary<string, Parse> _symbolParsers = new Dictionary<string, Parse>() {{
             {string.Join(",\n\t\t\t", allAssignments.ToArray())}
         }};
@@ -37,7 +37,7 @@ namespace DynamicInterpreter {{
             var parserResult = new Result();
             var errors = new List<Error>();
             _symbolParsers[""EntryPoint""](code, 0, parserResult, errors);
-            return Tuple.Create(Parser.RecursiveEval(parserResult, _symbolHandlers.ToDictionary(x => x.SymbolName)), errors);
+            return Tuple.Create(Interpreter.RecursiveEval(parserResult, _symbolHandlers.ToDictionary(x => x.SymbolName)), errors);
         }}
     }}
 }}",
@@ -47,7 +47,7 @@ using System.Linq;
 using System.Collections.Generic;
 
 namespace DynamicInterpreter {{
-    public static partial class {ParserName}Parser {{
+    public static partial class {LanguageName}Interpreter {{
         static ISymbolHandler[] _symbolHandlers = new ISymbolHandler[] {{
             //////ADD HANDLERS HERE//////
             //new GenericSymbolHandler("""", args => {{
@@ -115,8 +115,8 @@ namespace DynamicInterpreter {{
     public delegate Tuple<State, string, int> Parse(string data, int charsHandledSoFar, Result acc, List<Error> errors);
     #endregion
 
-    #region Parse methods and helper functions
-    public static class Parser {{
+    #region Interpreter methods and helper functions
+    public static class Interpreter {{
         public static List<object> RecursiveEval(Result result, Dictionary<string, ISymbolHandler> handlers) {{
             return result.SelectMany(
                 x => x.Match<List<object>>(
@@ -128,7 +128,11 @@ namespace DynamicInterpreter {{
                 )
             ).ToList();
         }}
+    }}
+    #endregion
 
+    #region Parse methods and helper functions
+    public static class Parser {{
         public static Parse Symbol(string symbolName, Union<Parse, Func<Parse>> parser) {{
             return (data, charsHandledSoFar, acc, errors) => {{
                 var newAcc = new Result();

@@ -37,7 +37,7 @@ namespace REPL {
         }
 
         private static void LoadArgs() {
-            CommandlineParser.Execute(Environment.CommandLine);
+            CommandlineInterpreter.Execute(Environment.CommandLine);
         }
     }
 }

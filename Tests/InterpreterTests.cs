@@ -22,7 +22,7 @@ namespace Tests {
             var grammar = $"<{"EntryPoint"}> = '0'|'1'|'2'|'3'|'4'|'5'|'6'|'7'|'8'|'9'";
             var codeToRun = "1";
             var addHandler = Handler.Create("EntryPoint", args => int.Parse(args.ToDelimitedString("")));
-            var results = LoadLanguageParser.MakeTemporaryParser(grammar);
+            var results = LoadLanguageInterpreter.MakeTemporaryParser(grammar);
             Expect(results.Item2, Is.Empty);
 
             var result = results.Item1(codeToRun, new ISymbolHandler[] { addHandler });
@@ -34,7 +34,7 @@ namespace Tests {
             var grammar = $"<{"EntryPoint"}> = [0-9]";
             var codeToRun = "1";
             var addHandler = Handler.Create("EntryPoint", args => int.Parse(args.ToDelimitedString("")));
-            var results = LoadLanguageParser.MakeTemporaryParser(grammar);
+            var results = LoadLanguageInterpreter.MakeTemporaryParser(grammar);
             Expect(results.Item2, Is.Empty);
 
             var result = results.Item1(codeToRun, new ISymbolHandler[] { addHandler });
@@ -45,7 +45,7 @@ namespace Tests {
         public void GroupingTest() {
             var grammar = $"<{"EntryPoint"}> = '0'('1'|'2''3')";
             var codeToRun = "0231";
-            var results = LoadLanguageParser.MakeTemporaryParser(grammar);
+            var results = LoadLanguageInterpreter.MakeTemporaryParser(grammar);
             Expect(results.Item2, Is.Empty);
 
             var result = results.Item1(codeToRun, new ISymbolHandler[] { new CombineToStringSymbolHandler("EntryPoint")} );
@@ -61,7 +61,7 @@ namespace Tests {
                              <name> = -<keyword><allchars>
                              <{"EntryPoint"}> = <name>|<keyword>";
             var codeToRun = "abca";
-            var results = LoadLanguageParser.MakeTemporaryParser(grammar);
+            var results = LoadLanguageInterpreter.MakeTemporaryParser(grammar);
             Expect(results.Item2, Is.Empty);
 
             var result = results.Item1(codeToRun, new ISymbolHandler[] { new CombineToStringSymbolHandler("keyword") });
@@ -72,7 +72,7 @@ namespace Tests {
         public void DoubleNegative() {
             var grammar = $"<EntryPoint> = -(-'1')'1'";
             var codeToRun = "11";
-            var results = LoadLanguageParser.MakeTemporaryParser(grammar);
+            var results = LoadLanguageInterpreter.MakeTemporaryParser(grammar);
             Expect(results.Item2, Is.Empty);
 
             var result = results.Item1(codeToRun, new ISymbolHandler[] { new CombineToStringSymbolHandler("EntryPoint") });
@@ -83,7 +83,7 @@ namespace Tests {
         public void LiteralWithSlash() {
             var grammar = $"<{"EntryPoint"}> = '\\12'";
             var codeToRun = @"\12";
-            var results = LoadLanguageParser.MakeTemporaryParser(grammar);
+            var results = LoadLanguageInterpreter.MakeTemporaryParser(grammar);
             Expect(results.Item2, Is.Empty);
 
             var result = results.Item1(codeToRun, new ISymbolHandler[] { new CombineToStringSymbolHandler("EntryPoint") });
@@ -94,7 +94,7 @@ namespace Tests {
         public void LiteralWithQuotes() {
             var grammar = $"<{"EntryPoint"}> = '\"123\"'";
             var codeToRun = "\"123\"";
-            var results = LoadLanguageParser.MakeTemporaryParser(grammar);
+            var results = LoadLanguageInterpreter.MakeTemporaryParser(grammar);
             Expect(results.Item2, Is.Empty);
 
             var result = results.Item1(codeToRun, new ISymbolHandler[] { new CombineToStringSymbolHandler("EntryPoint") });
@@ -105,7 +105,7 @@ namespace Tests {
         public void PathTest() {
             var grammar = $"<{"EntryPoint"}> = 'C:\\test'";
             var codeToRun = "C:\\test";
-            var results = LoadLanguageParser.MakeTemporaryParser(grammar);
+            var results = LoadLanguageInterpreter.MakeTemporaryParser(grammar);
             Expect(results.Item2, Is.Empty);
 
             var result = results.Item1(codeToRun, new ISymbolHandler[] { new CombineToStringSymbolHandler("EntryPoint") });
@@ -116,7 +116,7 @@ namespace Tests {
         public void EmptyString() {
             var grammar = $"<{"EntryPoint"}> = ''";
             var codeToRun = "1";
-            var results = LoadLanguageParser.MakeTemporaryParser(grammar);
+            var results = LoadLanguageInterpreter.MakeTemporaryParser(grammar);
             Expect(results.Item2, Is.Empty);
 
             var result = results.Item1(codeToRun, new ISymbolHandler[] { new CombineToStringSymbolHandler("EntryPoint") });
@@ -127,7 +127,7 @@ namespace Tests {
         public void NotEmptyString() {
             var grammar = $"<{"EntryPoint"}> = -'''1'";
             var codeToRun = "1";
-            var results = LoadLanguageParser.MakeTemporaryParser(grammar);
+            var results = LoadLanguageInterpreter.MakeTemporaryParser(grammar);
             Expect(results.Item2, Is.Empty);
 
             var result = results.Item1(codeToRun, new ISymbolHandler[] { new CombineToStringSymbolHandler("EntryPoint") });
@@ -139,7 +139,7 @@ namespace Tests {
             var grammar = $"<{"EntryPoint"}> = '1'|'1'<{"EntryPoint"}>";
             var codeToRun = "111";
             var entryHandler = Handler.Create("EntryPoint", args => int.Parse(args.ToDelimitedString("")));
-            var results = LoadLanguageParser.MakeTemporaryParser(grammar);
+            var results = LoadLanguageInterpreter.MakeTemporaryParser(grammar);
             Expect(results.Item2, Is.Empty);
 
             var result = results.Item1(codeToRun, new ISymbolHandler[] { entryHandler });
@@ -153,7 +153,7 @@ namespace Tests {
             var codeToRun = "12121";
             var entryHandler = Handler.Create("EntryPoint", args => args.ToDelimitedString(""));
             var aHandler = Handler.Create("a", args => args.ToDelimitedString(""));
-            var results = LoadLanguageParser.MakeTemporaryParser(grammar);
+            var results = LoadLanguageInterpreter.MakeTemporaryParser(grammar);
             Expect(results.Item2, Is.Empty);
 
             var result = results.Item1(codeToRun, new ISymbolHandler[] { entryHandler, aHandler });
@@ -170,7 +170,7 @@ namespace Tests {
             var entryHandler = Handler.Create("EntryPoint", args => args.First());
             var digitHandler = Handler.Create("digit", args => int.Parse(args.First().ToString()));
             var addHandler = Handler.Create("add", args => args.Select(x => x.ToString() == "+" ? 0 : (int)x).Sum());
-            var results = LoadLanguageParser.MakeTemporaryParser(grammar);
+            var results = LoadLanguageInterpreter.MakeTemporaryParser(grammar);
             Expect(results.Item2, Is.Empty);
 
             var result = results.Item1(codeToRun, new ISymbolHandler[] { entryHandler, digitHandler, addHandler });
@@ -187,7 +187,7 @@ namespace Tests {
 
             var codeToRun = "123abc";
             var entryHandler = Handler.Create("EntryPoint", args => args);
-            var results = LoadLanguageParser.MakeTemporaryParser(grammar);
+            var results = LoadLanguageInterpreter.MakeTemporaryParser(grammar);
             Expect(results.Item2, Is.Empty);
 
             var result = results.Item1(codeToRun, new ISymbolHandler[] { entryHandler });

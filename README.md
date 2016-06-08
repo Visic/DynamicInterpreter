@@ -37,8 +37,8 @@ f\<all_assignments\> = (\<assignment\>|\<fallback_point\>)(''|\<all_assignments\
 Note:: The "EntryPoint" symbol is required, without it you will probably crash..
 
 How to use::
-All features are available through the REPL, "MakeParser" and "Language" are the two key commands.
-The MakeParser command takes a filepath to your description language, an output directory, the name of your parser, and generates three files to include in your project.
+All features are available through the REPL, "MakeInterpreter" and "Language" are the two key commands.
+The MakeInterpreter command takes a filepath to your description language, an output directory, the name of your parser, and generates three files to include in your project.
 	{name}Parser_Edit.cs -- this is where you will put your symbol handlers (the code that will get called as a result of successfully parsing your language)
 	{name}Parser_NoEdit.cs -- Generated Parser code
 	InterpreterSupport_NoEdit.cs -- Support code required by {name}Parser_NoEdit.cs but abstracted in order to de-duplicate (useful if you make more than one parser in a single project)
@@ -50,5 +50,5 @@ The Language command takes the filepath to a "Language" assembly (see TestLangua
 How it works::
 The Parser itself is a set "Parse" functions which get combined to form the complete parsing routines for each symbol (Note:: This is based on Parser Combinators)
 When the Parser asked to "Execute" some code, that code is run through the "EntryPoint" parser, and the result (if not an error) is a tree of parsed strings.
-This tree is then passed to a function (Parser.RecursiveEval) along with your symbol handlers.
+This tree is then passed to a function (Interpreter.RecursiveEval) along with your symbol handlers.
 The RecursiveEval function passes the parsed data through your symbol handlers (as well as whatever you return from your handlers) until it completes, then it just returns whatever it has left (the result of your EntryPoint handler)

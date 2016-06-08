@@ -10,4 +10,3 @@
 	--Try to eliminate the need for recursion
 
 --Working on
-	--Think about renaming "Parser" stuff to "Interpreter" since it is probably more accurate..

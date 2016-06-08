@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using REPL;
 
 namespace DynamicInterpreter {
-    public static partial class REPLCommandParser {
+    public static partial class REPLCommandInterpreter {
         static ISymbolHandler[] _symbolHandlers = new ISymbolHandler[] {
             //////ADD HANDLERS HERE//////
             new CombineToStringSymbolHandler("arg"),

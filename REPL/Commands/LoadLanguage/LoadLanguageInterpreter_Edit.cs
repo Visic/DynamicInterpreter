@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using Utility;
 
 namespace DynamicInterpreter {
-    public static partial class LoadLanguageParser {
+    public static partial class LoadLanguageInterpreter {
         static Dictionary<string, Parse> _assignedSymbols = new Dictionary<string, Parse>();
 
         static ISymbolHandler[] _symbolHandlers = new ISymbolHandler[] {
