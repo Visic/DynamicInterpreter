@@ -121,6 +121,9 @@
   <data name="CommandlineGrammar" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\CommandlineGrammar.txt;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
   </data>
+  <data name="DescriptionLanguageGrammar" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\DescriptionLanguageGrammar.txt;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
+  </data>
   <data name="REPLCommandGrammar" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\REPLCommandGrammar.txt;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
   </data>

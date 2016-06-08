@@ -33,14 +33,13 @@ namespace REPL {
                 var languageInfo = (ILanguageInfo)Activator.CreateInstance(assem.GetTypes().First(x => x.GetInterfaces().Contains(typeof(ILanguageInfo))));
                 Program.LanguageName = languageInfo.Name;
 
-                var results = Parser.Execute(languageInfo.Grammar);
+                var results = LoadLanguageParser.MakeTemporaryParser(languageInfo.Grammar);
                 if (results.Item2.Count > 0) {
                     BetterConsole.WriteOnNextLine($"Failure to load language: {string.Join("\n\n", results.Item2.Select(y => TreePrinter.ToString(y, z => z.SubErrors)))}", ConsoleColor.Red);
                     return;
                 }
 
-                Program._languageInterp = new Interpreter();
-                Program._languageInterp.Setup(results.Item1, handlers);
+                Program._languageInterp = code => results.Item1(code, handlers);
                 _languagedLoaded = true;
                 BetterConsole.WriteOnNextLine($"{languageInfo.Name} loaded.");
             } catch {

@@ -1,0 +1,8 @@
+﻿Add the ability to parse the feature in 
+	DescriptionLanguageGrammar.txt
+	DescriptionLanguageParser_Edit.cs	
+	ParserCodeGenerator.cs
+
+--Double check the final implementation by running "makeparser" on DescriptionLanguageGrammar.txt
+
+Done!

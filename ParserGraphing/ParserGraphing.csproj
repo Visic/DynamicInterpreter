@@ -63,10 +63,6 @@
     <None Include="Resources\DescriptionLanguageGrammar.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\DynamicInterpreter\DynamicInterpreter.csproj">
-      <Project>{14009445-aec1-4f7e-b428-9bb070a33510}</Project>
-      <Name>DynamicInterpreter</Name>
-    </ProjectReference>
     <ProjectReference Include="..\REPL\REPL.csproj">
       <Project>{1e195ee0-4b83-4856-8cbd-c6431577e345}</Project>
       <Name>REPL</Name>
