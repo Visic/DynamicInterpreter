@@ -3,6 +3,7 @@ This is a parser/interpreter generator using a simple custom description languag
 
 Example of the description language (This is actually the current description language written in itself!)--
 
+<code>
 \<whitespace\> = ' '|'\\t'|'\\r\\n'|'\\n'
 \<escaped\> = '\\\\'-'\\\\'|'\\\\\\\\'\<escaped\>
 \<all_escape_chars\> = '\\\\'|'\\\\'\<all_escape_chars\>
@@ -33,7 +34,7 @@ Example of the description language (This is actually the current description la
 f\<all_assignments\> = (\<assignment\>|\<fallback_point\>)(''|\<all_assignments\>)
 \<all_all_assignments\> = \<all_assignments\>
 \<EntryPoint\> = \<all_all_assignments\>
-
+</code>
 
 Note:: The "EntryPoint" symbol is required, without it you will probably crash..
 
