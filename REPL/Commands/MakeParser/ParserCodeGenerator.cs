@@ -239,13 +239,8 @@ namespace DynamicInterpreter {{
             }};
         }}
 
-        public static Parse Eval(Union<Parse, Func<Parse>> val) {{
-            return val.Match<Parse>(x => x, x => x());
-        }}
-
-        public static Func<Parse> FixType(Func<Parse> parse) {{
-            return parse;
-        }}
+        public static Parse Eval(Union<Parse, Func<Parse>> val) => val.Match<Parse>(x => x, x => x());
+        public static Func<Parse> FixType(Func<Parse> parse) => parse;
 
         private static Option<Tuple<State, string, int>> CannotBeEmpty(string data, int charsHandledSoFar, List<Error> errors) {{
             if(data.Length > 0) return new None();
