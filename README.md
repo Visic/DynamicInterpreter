@@ -3,36 +3,36 @@ This is a parser/interpreter generator using a simple custom description languag
 
 Example of the description language (This is actually the current description language written in itself!)--
 
-<whitespace> = ' '|'\t'|'\r\n'|'\n'
-<escaped> = '\\'-'\\'|'\\\\'<escaped>
-<all_escape_chars> = '\\'|'\\'<all_escape_chars>
-<almost_all_escape_chars> = '\\'--'\\'|'\\'<almost_all_escape_chars>
-<all_whitespace> = <whitespace>|<whitespace><all_whitespace>
-<ignore_all_whitespace> = ''|<all_whitespace>
-<anychar> = '*'
+\<whitespace\> = ' '|'\\t'|'\\r\\n'|'\\n'
+\<escaped\> = '\\\\'-'\\\\'|'\\\\\\\\'\<escaped\>
+\<all_escape_chars\> = '\\\\'|'\\\\'\<all_escape_chars\>
+\<almost_all_escape_chars\> = '\\\\'--'\\\\'|'\\\\'\<almost_all_escape_chars\>
+\<all_whitespace\> = \<whitespace\>|\<whitespace\>\<all_whitespace\>
+\<ignore_all_whitespace\> = ''|\<all_whitespace\>
+\<anychar\> = '*'
 
-<range> = '[' ('\\]'|'\\-'|-('-'|']')*) '-' ('\\]'|'\\-'|-('-'|']')*) ']'
+\<range\> = '[' ('\\\\]'|'\\\\-'|-('-'|']')*) '-' ('\\\\]'|'\\\\-'|-('-'|']')*) ']'
 
-<allchars_not_quote> = -('\''|<escaped><almost_all_escape_chars>'\\\'')(--<escaped><all_escape_chars>*|-<escaped><all_escape_chars>|*)(''|<allchars_not_quote>)
-<literal> = '\''(''|<allchars_not_quote>)'\''
+\<allchars_not_quote\> = -('\\''|\<escaped\>\<almost_all_escape_chars\>'\\\\\\'')(--\<escaped\>\<all_escape_chars\>*|-\<escaped\>\<all_escape_chars\>|*)(''|\<allchars_not_quote\>)
+\<literal\> = '\\''(''|\<allchars_not_quote\>)'\\''
 
-<allchars_not_gt> = -('>'|<escaped><almost_all_escape_chars>'\\>')(--<escaped><all_escape_chars>*|-<escaped><all_escape_chars>|*)(''|<allchars_not_gt>)
-<symbol> = '<'<allchars_not_gt>'>'
+\<allchars_not_gt\> = -('\>'|\<escaped\>\<almost_all_escape_chars\>'\\\\\>')(--\<escaped\>\<all_escape_chars\>*|-\<escaped\>\<all_escape_chars\>|*)(''|\<allchars_not_gt\>)
+\<symbol\> = '\<'\<allchars_not_gt\>'\>'
 
-<inorder_ele> = <ignore_all_whitespace>(<symbol><ignore_all_whitespace>-'='|<literal>|<group>|<negation>|<anychar>|<range>)
-<inorder> = <inorder_ele>|<inorder_ele><inorder>
-<all_inorder> = <inorder>
+\<inorder_ele\> = \<ignore_all_whitespace\>(\<symbol\>\<ignore_all_whitespace\>-'='|\<literal\>|\<group\>|\<negation\>|\<anychar\>|\<range\>)
+\<inorder\> = \<inorder_ele\>|\<inorder_ele\>\<inorder\>
+\<all_inorder\> = \<inorder\>
 
-<any> = <all_inorder>|<all_inorder>'|'<any>
-<all_any> = <any>
-<group> = '('<all_any><ignore_all_whitespace>')'
-<negation> = '-'(<group>|<symbol>|<literal>|<negation>|<range>|<anychar>)
-<assignment> = <ignore_all_whitespace>'<'<allchars_not_gt>'>'<ignore_all_whitespace>'='<all_any><ignore_all_whitespace>
+\<any\> = \<all_inorder\>|\<all_inorder\>'|'\<any\>
+\<all_any\> = \<any\>
+\<group\> = '('\<all_any\>\<ignore_all_whitespace\>')'
+\<negation\> = '-'(\<group\>|\<symbol\>|\<literal\>|\<negation\>|\<range\>|\<anychar\>)
+\<assignment\> = \<ignore_all_whitespace\>'\<'\<allchars_not_gt\>'\>'\<ignore_all_whitespace\>'='\<all_any\>\<ignore_all_whitespace\>
 
-<fallback_point> = 'f'<assignment>
-f<all_assignments> = (<assignment>|<fallback_point>)(''|<all_assignments>)
-<all_all_assignments> = <all_assignments>
-<EntryPoint> = <all_all_assignments>
+\<fallback_point\> = 'f'\<assignment\>
+f\<all_assignments\> = (\<assignment\>|\<fallback_point\>)(''|\<all_assignments\>)
+\<all_all_assignments\> = \<all_assignments\>
+\<EntryPoint\> = \<all_all_assignments\>
 
 
 Note:: The "EntryPoint" symbol is required, without it you will probably crash..
