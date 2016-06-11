@@ -1,5 +1,4 @@
 ﻿--Consider adding "rules" or "tostring" to allow the parser to work on any data, not just strings
---less verbose error feedback
 --Let REPL handle newlines in content (how should we mark the end of content?)
 --Optimization
 	--Evaluate the performance of the generated parsers and optimize if needed
@@ -10,3 +9,4 @@
 	--Try to eliminate the need for recursion
 
 --Working on
+	--less verbose error feedback

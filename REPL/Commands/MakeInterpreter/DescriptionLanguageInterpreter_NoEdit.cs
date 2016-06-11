@@ -4,7 +4,7 @@ using System.Linq;
 using System.Collections.Generic;
 
 namespace DynamicInterpreter {
-    public static partial class LoadLanguageInterpreter {
+    public static partial class DescriptionLanguageInterpreter {
         static IReadOnlyDictionary<string, Parse> _symbolParsers = new Dictionary<string, Parse>() {
             {"newline", Parser.Symbol("newline", Parser.Any(Parser.Literal("\r\n"), Parser.Literal("\n")))},
             {"whitespace", Parser.Symbol("whitespace", Parser.Any(Parser.Literal(" "), Parser.Literal("\t"), Parser.FixType(() => _symbolParsers["newline"])))},

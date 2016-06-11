@@ -11,6 +11,7 @@ namespace DynamicInterpreter {
         static ISymbolHandler[] _symbolHandlers = new ISymbolHandler[] {
             //////ADD HANDLERS HERE//////
             new IgnoreSymbolHandler("ignore_all_whitespace"),
+            new IgnoreSymbolHandler("comment"),
             new GenericSymbolHandler("symbol", args => new List<object> { new Union<Parse, Func<Parse>>(Parser.FixType(() => _assignedSymbols[(string)args[1]])) }),
             new GenericSymbolHandler("negation", args => new List<object> { new Union<Parse, Func<Parse>>(Parser.Negate((Union<Parse, Func<Parse>>)args[1])) }),
             new GenericSymbolHandler("group", args => new List<object> { (Union<Parse, Func<Parse>>)args[1] }),
@@ -34,7 +35,7 @@ namespace DynamicInterpreter {
                 return new List<object>() { Tuple.Create(str, new Union<Parse, Func<Parse>>(Parser.Symbol(str, (Union<Parse, Func<Parse>>)args[4]))) };
             }),
 
-            new GenericSymbolHandler("all_all_assignments", args => {
+            new GenericSymbolHandler("all_all_assignments_and_comments", args => {
                 var castArgs = args.Take(args.Count - 1).Cast<Tuple<string, Union<Parse, Func<Parse>>>>().ToArray();
                 foreach(var ele in castArgs) {
                     _assignedSymbols[ele.Item1] = Parser.Eval(ele.Item2);

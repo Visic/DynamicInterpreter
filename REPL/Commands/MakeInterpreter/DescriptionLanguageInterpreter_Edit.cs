@@ -1,29 +1,29 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
+//AUTO-GENERATED - Dynamic Interpreter (by Andrew Frailing  https://github.com/Visic)
+using System;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using DynamicInterpreter;
+using System.Collections.Generic;
+using REPL.MakeInterpreter;
 using Utility;
 
-namespace REPL.MakeParser {
-    public static class SymbolHandlers {
-        public static ISymbolHandler[] GetHandlers(string outputDirectory) {
-            return new ISymbolHandler[] {
-                new LiteralHandler(), new SymbolHandler(), new AnyCharHandler(),
-                new RangeHandler(), new FallbackPointHandler(), new InOrderHandler(),
-                new AnyHandler(), new NegationHandler(), new AssignmentHandler(),
-                new AllAssignmentsHandler(), new EntryPointHandler(), new GroupHandler(),
-                new IgnoreWhitespaceHandler(), new AllCharsNotGTHandler(), new AllCharsNotQuoteHandler()
-            };
-        }
+namespace DynamicInterpreter {
+    public static partial class DescriptionLanguageInterpreter {
+        static ISymbolHandler[] _symbolHandlers = new ISymbolHandler[] {
+            //////ADD HANDLERS HERE//////
+            new LiteralHandler(), new SymbolHandler(), new AnyCharHandler(),
+            new RangeHandler(), new FallbackPointHandler(), new InOrderHandler(),
+            new AnyHandler(), new NegationHandler(), new AssignmentHandler(),
+            new AllAssignmentsHandler(), new EntryPointHandler(), new GroupHandler(),
+            new IgnoreWhitespaceHandler(), new AllCharsNotGTHandler(), new AllCharsNotQuoteHandler(),
+            new IgnoreSymbolHandler("comment")
+            //////ADD HANDLERS HERE//////
+        };
 
+        #region Handlers
         public class LiteralHandler : ISymbolHandler {
             public string SymbolName { get; } = "literal";
 
             public List<object> Call(List<object> args) {
-                return new List<object> { ParserCodeGenerator.Literal(((string)args[1]).Replace("\"", "\\\"")) };
+                return new List<object> { InterpreterCodeGenerator.Literal(((string)args[1]).Replace("\"", "\\\"")) };
             }
         }
 
@@ -31,7 +31,7 @@ namespace REPL.MakeParser {
             public string SymbolName { get; } = "symbol";
 
             public List<object> Call(List<object> args) {
-                return new List<object> { ParserCodeGenerator.Symbol(((string)args[1]).Replace("\"", "\\\"")) };
+                return new List<object> { InterpreterCodeGenerator.Symbol(((string)args[1]).Replace("\"", "\\\"")) };
             }
         }
 
@@ -39,7 +39,7 @@ namespace REPL.MakeParser {
             public string SymbolName { get; } = "anychar";
 
             public List<object> Call(List<object> args) {
-                return new List<object> { ParserCodeGenerator.AnyChar() };
+                return new List<object> { InterpreterCodeGenerator.AnyChar() };
             }
         }
 
@@ -47,7 +47,7 @@ namespace REPL.MakeParser {
             public string SymbolName { get; } = "range";
 
             public List<object> Call(List<object> args) {
-                return new List<object> { ParserCodeGenerator.Range(((string)args[1])[0], ((string)args[3])[0]) };
+                return new List<object> { InterpreterCodeGenerator.Range(((string)args[1])[0], ((string)args[3])[0]) };
             }
         }
 
@@ -56,7 +56,7 @@ namespace REPL.MakeParser {
 
             public List<object> Call(List<object> args) {
                 var assignment = (Tuple<string, string>)args[1];
-                return new List<object> { Tuple.Create(assignment.Item1, ParserCodeGenerator.FallbackPoint(assignment.Item2)) };
+                return new List<object> { Tuple.Create(assignment.Item1, InterpreterCodeGenerator.FallbackPoint(assignment.Item2)) };
             }
         }
 
@@ -65,7 +65,7 @@ namespace REPL.MakeParser {
 
             public List<object> Call(List<object> args) {
                 if(args.Count == 1) return args;
-                return new List<object> { ParserCodeGenerator.InOrder(args.Cast<string>()) };
+                return new List<object> { InterpreterCodeGenerator.InOrder(args.Cast<string>()) };
             }
         }
 
@@ -74,7 +74,7 @@ namespace REPL.MakeParser {
 
             public List<object> Call(List<object> args) {
                 if(args.Count == 1) return args;
-                return new List<object> { ParserCodeGenerator.Any(args.Where(x => (string)x != "|").Cast<string>()) };
+                return new List<object> { InterpreterCodeGenerator.Any(args.Where(x => (string)x != "|").Cast<string>()) };
             }
         }
 
@@ -82,7 +82,7 @@ namespace REPL.MakeParser {
             public string SymbolName { get; } = "negation";
 
             public List<object> Call(List<object> args) {
-                return new List<object> { ParserCodeGenerator.Negate((string)args[1]) };
+                return new List<object> { InterpreterCodeGenerator.Negate((string)args[1]) };
             }
         }
 
@@ -91,16 +91,16 @@ namespace REPL.MakeParser {
 
             public List<object> Call(List<object> args) {
                 var newSymbolName = (string)args[1];
-                return new List<object> { Tuple.Create(newSymbolName, ParserCodeGenerator.Assignment(newSymbolName, (string)args[4])) };
+                return new List<object> { Tuple.Create(newSymbolName, InterpreterCodeGenerator.Assignment(newSymbolName, (string)args[4])) };
             }
         }
 
         public class AllAssignmentsHandler : ISymbolHandler {
-            public string SymbolName { get; } = "all_all_assignments";
+            public string SymbolName { get; } = "all_all_assignments_and_comments";
 
             public List<object> Call(List<object> args) {
                 var castArgs = args.Take(args.Count - 1).Cast<Tuple<string, string>>().ToArray();
-                return ParserCodeGenerator.AllAssignments(castArgs).Cast<object>().ToList();
+                return InterpreterCodeGenerator.AllAssignments(castArgs).Cast<object>().ToList();
             }
         }
 
@@ -108,7 +108,7 @@ namespace REPL.MakeParser {
             public string SymbolName { get; } = "EntryPoint";
 
             public List<object> Call(List<object> args) {
-                return ParserCodeGenerator.EntryPoint(args.Cast<string>()).Cast<object>().ToList();
+                return InterpreterCodeGenerator.EntryPoint(args.Cast<string>()).Cast<object>().ToList();
             }
         }
 
@@ -139,5 +139,6 @@ namespace REPL.MakeParser {
                 return new List<object> { args.Cast<string>().ToDelimitedString("").Replace(@"\'", "'") };
             }
         }
+        #endregion
     }
 }

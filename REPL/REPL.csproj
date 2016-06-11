@@ -52,11 +52,11 @@
     <Compile Include="Commands\ListCommand.cs" />
     <Compile Include="Commands\LoadLanguage\LoadLanguageInterpreter_Edit.cs" />
     <Compile Include="Commands\LoadLanguage\LoadLanguageInterpreter_NoEdit.cs" />
-    <Compile Include="Commands\MakeParser\DescriptionLanguageInterpreter_Edit.cs" />
-    <Compile Include="Commands\MakeParser\DescriptionLanguageInterpreter_NoEdit.cs" />
-    <Compile Include="Commands\MakeParser\InterpreterCodeGenerator.cs" />
-    <Compile Include="Commands\MakeParser\MakeInterpreterCommand.cs" />
     <Compile Include="Commands\LoadLanguage\LoadLanguage.cs" />
+    <Compile Include="Commands\MakeInterpreter\DescriptionLanguageInterpreter_Edit.cs" />
+    <Compile Include="Commands\MakeInterpreter\DescriptionLanguageInterpreter_NoEdit.cs" />
+    <Compile Include="Commands\MakeInterpreter\InterpreterCodeGenerator.cs" />
+    <Compile Include="Commands\MakeInterpreter\MakeInterpreterCommand.cs" />
     <Compile Include="Commands\REPLCommand.cs" />
     <Compile Include="DataStructures\NavigableBuffer.cs" />
     <Compile Include="Misc\ArgsAndSettings.cs" />
@@ -104,8 +104,8 @@
     <None Include="Resources\DescriptionLanguageGrammar.txt" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Commands\MakeParser\HowToAddNewLanguageFeatures.txt" />
-    <Content Include="Commands\MakeParser\TODO.txt" />
+    <Content Include="Commands\MakeInterpreter\HowToAddNewLanguageFeatures.txt" />
+    <Content Include="Commands\MakeInterpreter\TODO.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

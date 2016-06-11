@@ -1,4 +1,5 @@
-<whitespace> = ' '|'\t'|'\r\n'|'\n'
+<newline> = '\r\n'|'\n'
+<whitespace> = ' '|'\t'|<newline>
 <escaped> = '\\'-'\\'|'\\\\'<escaped>
 <all_escape_chars> = '\\'|'\\'<all_escape_chars>
 <almost_all_escape_chars> = '\\'--'\\'|'\\'<almost_all_escape_chars>
@@ -8,6 +9,9 @@
 
 <range> = '[' ('\\]'|'\\-'|-('-'|']')*) '-' ('\\]'|'\\-'|-('-'|']')*) ']'
 
+<comment_text> = (-<newline>*)(<comment_text>|'')
+<comment> = '//'<comment_text>
+
 <allchars_not_quote> = -('\''|<escaped><almost_all_escape_chars>'\\\'')(--<escaped><all_escape_chars>*|-<escaped><all_escape_chars>|*)(''|<allchars_not_quote>)
 <literal> = '\''(''|<allchars_not_quote>)'\''
 
@@ -15,6 +19,7 @@
 <symbol> = '<'<allchars_not_gt>'>'
 
 <inorder_ele> = <ignore_all_whitespace>(<symbol><ignore_all_whitespace>-'='|<literal>|<group>|<negation>|<anychar>|<range>)
+
 <inorder> = <inorder_ele>|<inorder_ele><inorder>
 <all_inorder> = <inorder>
 
@@ -25,6 +30,8 @@
 <assignment> = <ignore_all_whitespace>'<'<allchars_not_gt>'>'<ignore_all_whitespace>'='<all_any><ignore_all_whitespace>
 
 <fallback_point> = 'f'<assignment>
-f<all_assignments> = (<assignment>|<fallback_point>)(''|<all_assignments>)
-<all_all_assignments> = <all_assignments>
-<EntryPoint> = <all_all_assignments>
+f<all_assignments_and_comments> = (<assignment>|<fallback_point>|<comment>)(''|<all_assignments_and_comments>)
+<all_all_assignments_and_comments> = <all_assignments_and_comments>
+<EntryPoint> = <all_all_assignments_and_comments>
+
+//TODO:: Add <greedy>=<???>'+' so I don't need to keep making the <all...> = and then <all_all...>
