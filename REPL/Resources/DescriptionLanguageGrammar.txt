@@ -33,5 +33,3 @@
 f<all_assignments_and_comments> = (<assignment>|<fallback_point>|<comment>)(''|<all_assignments_and_comments>)
 <all_all_assignments_and_comments> = <all_assignments_and_comments>
 <EntryPoint> = <all_all_assignments_and_comments>
-
-//TODO:: Add <greedy>=<???>'+' so I don't need to keep making the <all...> = and then <all_all...>
