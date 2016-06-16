@@ -14,7 +14,7 @@ namespace DynamicInterpreter {
             new AnyHandler(), new NegationHandler(), new AssignmentHandler(),
             new AllAssignmentsHandler(), new EntryPointHandler(), new GroupHandler(),
             new IgnoreWhitespaceHandler(), new AllCharsNotGTHandler(), new AllCharsNotQuoteHandler(),
-            new IgnoreSymbolHandler("comment")
+            new IgnoreSymbolHandler("comment"), new RepeatHandler()
             //////ADD HANDLERS HERE//////
         };
 
