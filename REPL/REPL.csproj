@@ -50,8 +50,8 @@
     <Compile Include="Commands\CommandRegistry.cs" />
     <Compile Include="Commands\HelpCommand.cs" />
     <Compile Include="Commands\ListCommand.cs" />
-    <Compile Include="Commands\LoadLanguage\LoadLanguageInterpreter_Edit.cs" />
     <Compile Include="Commands\LoadLanguage\LoadLanguageInterpreter_NoEdit.cs" />
+    <Compile Include="Commands\LoadLanguage\LoadLanguageInterpreter_Edit.cs" />
     <Compile Include="Commands\LoadLanguage\LoadLanguage.cs" />
     <Compile Include="Commands\MakeInterpreter\DescriptionLanguageInterpreter_Edit.cs" />
     <Compile Include="Commands\MakeInterpreter\DescriptionLanguageInterpreter_NoEdit.cs" />

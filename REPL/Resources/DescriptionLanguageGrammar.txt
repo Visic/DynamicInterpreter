@@ -7,7 +7,7 @@
 <ignore_all_whitespace> = ''|<all_whitespace>
 <anychar> = '*'
 
-<range> = '[' ('\\]'|'\\-'|-('-'|']')*) '-' ('\\]'|'\\-'|-('-'|']')*) ']'
+<range> = '[' ('\\]'|'\\-'|-('-'|']')*) ':' ('\\]'|'\\-'|-('-'|']')*) ']'
 
 <comment_text> = (-<newline>*)(<comment_text>|'')
 <comment> = '//'<comment_text>
@@ -18,7 +18,7 @@
 <allchars_not_gt> = -('>'|<escaped><almost_all_escape_chars>'\\>')(--<escaped><all_escape_chars>*|-<escaped><all_escape_chars>|*)(''|<allchars_not_gt>)
 <symbol> = '<'<allchars_not_gt>'>'
 
-<inorder_ele> = <ignore_all_whitespace>(<symbol><ignore_all_whitespace>-'='|<literal>|<group>|<negation>|<anychar>|<range>)
+<inorder_ele> = <ignore_all_whitespace>(<symbol><ignore_all_whitespace>-'='|<literal>|<group>|<negation>|<anychar>|<range>|<repeat>)
 
 <inorder> = <inorder_ele>|<inorder_ele><inorder>
 <all_inorder> = <inorder>
@@ -26,7 +26,9 @@
 <any> = <all_inorder>|<all_inorder>'|'<any>
 <all_any> = <any>
 <group> = '('<all_any><ignore_all_whitespace>')'
-<negation> = '-'(<group>|<symbol>|<literal>|<negation>|<range>|<anychar>)
+<negation> = '-'(<group>|<symbol>|<literal>|<negation>|<range>|<anychar>|<repeat>)
+<integer> = [0-9](''|<integer>)
+<repeat> = (<group>|<symbol>|<literal>|<range>|<anychar>)<ignore_all_whitespace>'{'<ignore_all_whitespace>(<integer>)|'')<ignore_all_whitespace>':'<ignore_all_whitespace>(''|<integer>)<ignore_all_whitespace>'}'
 <assignment> = <ignore_all_whitespace>'<'<allchars_not_gt>'>'<ignore_all_whitespace>'='<all_any><ignore_all_whitespace>
 
 <fallback_point> = 'f'<assignment>

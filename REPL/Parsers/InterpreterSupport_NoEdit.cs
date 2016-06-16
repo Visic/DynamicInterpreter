@@ -13,10 +13,14 @@ namespace DynamicInterpreter {
 
     public class GenericSymbolHandler : ISymbolHandler {
         Func<List<object>, List<object>> _call;
+        
         public GenericSymbolHandler(string name, Func<List<object>, List<object>> call) {
             SymbolName = name;
             _call = call;
         }
+        
+        public GenericSymbolHandler(string name, Func<List<object>, object> call) : this(name, x => new List<object>(){ call(x) }) { }
+        public GenericSymbolHandler(string name, Action<List<object>> call) : this(name, x => { call(x); return new List<object>(); }) { }
 
         public string SymbolName { get; }
         public virtual List<object> Call(List<object> args) { return _call(args); }
@@ -88,6 +92,50 @@ namespace DynamicInterpreter {
                     errors.Add(new Error($"Failed to parse {symbolName}", newErrors, charsHandledSoFar));
                 }
 
+                return result;
+            };
+        }
+
+        public static Parse Repeat(Union<Parse, Func<Parse>> parser, int? start, int? end) {
+            return (data, charsHandledSoFar, acc, errors) => {
+                start = start ?? 0;
+                if (end.HasValue && end < start) {
+                    errors.Add(new Error($"End [{end}] is less than start [{start}]", charsHandledSoFar));
+                    return Tuple.Create(State.Failure, data, charsHandledSoFar);
+                }
+                var emptyCheck = CannotBeEmpty(data, charsHandledSoFar, errors);
+                if(emptyCheck.IsSome && start > 0) return emptyCheck.Value;
+
+                var newAcc = new Result();
+                var newErrors = new List<Error>();
+                var currentResult = Tuple.Create(State.Success, data, charsHandledSoFar);
+                var i = 0;
+                for(; i < start; ++i) {
+                    currentResult = Eval(parser)(currentResult.Item2, currentResult.Item3, newAcc, newErrors);
+                    if(currentResult.Item1 == State.Failure) {
+                        errors.Add(new Error($"Failed to consume at least {start} repetitions", newErrors, charsHandledSoFar));
+                        return Tuple.Create(State.Failure, data, charsHandledSoFar);
+                    }
+                }
+
+                var result = currentResult;
+                acc.AddRange(newAcc);
+                errors.AddRange(newErrors);
+                newAcc.Clear();
+                newErrors.Clear();
+                while(true) {
+                    if (end.HasValue && ++i == end) break;
+                    currentResult = Eval(parser)(currentResult.Item2, currentResult.Item3, newAcc, newErrors);
+                    if(currentResult.Item1 == State.Success) { 
+                        result = currentResult;
+                        acc.AddRange(newAcc);
+                        errors.AddRange(newErrors);
+                        newAcc.Clear();
+                        newErrors.Clear();
+                    } else {
+                        break;
+                    }
+                }
                 return result;
             };
         }

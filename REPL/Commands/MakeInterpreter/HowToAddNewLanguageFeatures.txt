@@ -2,7 +2,7 @@
 	DescriptionLanguageGrammar.txt
 	DescriptionLanguageParser_Edit.cs
 	LoadLanguageInterpreter_Edit.cs
-	ParserCodeGenerator.cs
+	InterpreterCodeGenerator.cs
 
 --Double check the final implementation by running "MakeInterpreter" on DescriptionLanguageGrammar.txt
 

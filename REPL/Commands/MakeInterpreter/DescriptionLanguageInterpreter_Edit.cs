@@ -51,6 +51,16 @@ namespace DynamicInterpreter {
             }
         }
 
+        public class RepeatHandler : ISymbolHandler {
+            public string SymbolName { get; } = "repeat";
+
+            public List<object> Call(List<object> args) {
+                var start = string.IsNullOrEmpty((string)args[2]) ? new int?() : int.Parse((string)args[2]);
+                var end = string.IsNullOrEmpty((string)args[4]) ? new int?() : int.Parse((string)args[4]);
+                return new List<object> { InterpreterCodeGenerator.Repeat((string)args[0], start, end) };
+            }
+        }
+
         public class FallbackPointHandler : ISymbolHandler {
             public string SymbolName { get; } = "fallback_point";
 

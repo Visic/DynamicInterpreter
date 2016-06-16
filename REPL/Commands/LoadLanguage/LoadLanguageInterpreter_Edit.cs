@@ -48,6 +48,13 @@ namespace DynamicInterpreter {
                 return new List<object> { new Union<Parse, Func<Parse>>(Parser.InOrder(args.Cast<Union<Parse, Func<Parse>>>().ToArray())) };
             }),
 
+            new GenericSymbolHandler("repeat", args => {
+                var parser = (Union<Parse, Func<Parse>>)args[0];
+                var start = string.IsNullOrEmpty((string)args[2]) ? new int?() : int.Parse((string)args[2]);
+                var end = string.IsNullOrEmpty((string)args[4]) ? new int?() : int.Parse((string)args[4]);
+                return new List<object> { new Union<Parse, Func<Parse>>(Parser.Repeat(parser, start, end)) };
+            }),
+
             new GenericSymbolHandler("anychar", args => {
                 return new List<object> { new Union<Parse, Func<Parse>>(Parser.AnyChar()) };
             }),
