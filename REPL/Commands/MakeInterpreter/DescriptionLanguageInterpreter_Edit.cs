@@ -14,7 +14,7 @@ namespace DynamicInterpreter {
             new AnyHandler(), new NegationHandler(), new AssignmentHandler(),
             new AllAssignmentsHandler(), new EntryPointHandler(), new GroupHandler(),
             new IgnoreWhitespaceHandler(), new AllCharsNotGTHandler(), new AllCharsNotQuoteHandler(),
-            new IgnoreSymbolHandler("comment"), new RepeatHandler()
+            new IgnoreSymbolHandler("comment"), new RepeatHandler(), new CombineToStringSymbolHandler("integer")
             //////ADD HANDLERS HERE//////
         };
 
@@ -55,8 +55,8 @@ namespace DynamicInterpreter {
             public string SymbolName { get; } = "repeat";
 
             public List<object> Call(List<object> args) {
-                var start = string.IsNullOrEmpty((string)args[2]) ? new int?() : int.Parse((string)args[2]);
-                var end = string.IsNullOrEmpty((string)args[4]) ? new int?() : int.Parse((string)args[4]);
+                var start = string.IsNullOrEmpty((string)args[2]) ? "null" : (string)args[2];
+                var end = string.IsNullOrEmpty((string)args[4]) ? "null" : (string)args[4];
                 return new List<object> { InterpreterCodeGenerator.Repeat((string)args[0], start, end) };
             }
         }

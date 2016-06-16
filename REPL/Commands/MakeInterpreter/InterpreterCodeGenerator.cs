@@ -7,7 +7,7 @@ namespace REPL.MakeInterpreter {
         public static string LanguageName { get; set; }
 
         public static string Range(char start, char end) => $"Parser.Range('{start}', '{end}')";
-        public static string Repeat(string parser, int? start, int? end) => $"Parser.Repeat({parser}, {start}, {end})";
+        public static string Repeat(string parser, string start, string end) => $"Parser.Repeat({parser}, {start}, {end})";
         public static string AnyChar() => $"Parser.AnyChar()";
         public static string Literal(string value) => $"Parser.Literal(\"{value}\")";
         public static string Symbol(string symbolName) => $"Parser.FixType(() => _symbolParsers[\"{symbolName}\"])";

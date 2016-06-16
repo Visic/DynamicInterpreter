@@ -16,6 +16,7 @@ namespace DynamicInterpreter {
             new GenericSymbolHandler("negation", args => new List<object> { new Union<Parse, Func<Parse>>(Parser.Negate((Union<Parse, Func<Parse>>)args[1])) }),
             new GenericSymbolHandler("group", args => new List<object> { (Union<Parse, Func<Parse>>)args[1] }),
             new GenericSymbolHandler("EntryPoint", args => new List<object> { new Union<Parse, Func<Parse>>(_assignedSymbols["EntryPoint"]) }),
+            new CombineToStringSymbolHandler("integer"),
 
             new GenericSymbolHandler("allchars_not_gt", args => {
                 return new List<object> { args.Cast<string>().ToDelimitedString("").Replace(@"\>", ">") };
