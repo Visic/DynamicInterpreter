@@ -31,7 +31,7 @@ namespace Tests {
 
         [Test]
         public void SimpleDigitRangeTest() {
-            var grammar = $"<{"EntryPoint"}> = [0-9]";
+            var grammar = $"<{"EntryPoint"}> = [0:9]";
             var codeToRun = "1";
             var addHandler = Handler.Create("EntryPoint", args => int.Parse(args.ToDelimitedString("")));
             var results = LoadLanguageInterpreter.MakeTemporaryParser(grammar);

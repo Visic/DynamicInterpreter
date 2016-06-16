@@ -1,9 +1,7 @@
-<digits> = [0-9]
-<whitespace> = ' '|'\t'|'\r\n'|'\n'
+<digits> = [0:9]
 
-<any_whitespace> = <whitespace>|<whitespace><any_whitespace>
-<ignore_whitespace> = <any_whitespace>
-<integer> = <digits>|<digits><integer>
+<ignore_whitespace> = (' '|'\t'|'\r\n'|'\n'){1:}
+<integer> = <digits>{1:}
 
 <add> = <integer>(''|<ignore_whitespace>)'+'(''|<ignore_whitespace>)<integer>
 <EntryPoint> = <add>

@@ -213,21 +213,22 @@ namespace DynamicInterpreter {
 
         public static Parse Any(params Union<Parse, Func<Parse>>[] parsers) {
             return (data, charsHandledSoFar, acc, errors) => {
-                var newErrors = new List<Error>();
                 var result = parsers.Select(
                     x => {
+                        var newErrors = new List<Error>();
                         var newAcc = new Result();
-                        return new { result = Eval(x)(data, charsHandledSoFar, newAcc, newErrors), acc = newAcc };
+                        return new { result = Eval(x)(data, charsHandledSoFar, newAcc, newErrors), acc = newAcc, errors = newErrors };
                     }
-                ).Where(x => x.result.Item1 == State.Success).ToArray();
+                ).ToArray();
 
-                if(result.Length == 0) {
-                    errors.Add(new Error("All of the following possibilities failed", newErrors, charsHandledSoFar));
+                if(result.All(x => x.result.Item1 == State.Failure)) {
+                    errors.Add(new Error("All of the following possibilities failed", result.SelectMany(x => x.errors).ToList(), charsHandledSoFar));
                     return Tuple.Create(State.Failure, data, charsHandledSoFar);
                 }
 
-                var longestMatch = result.MaxBy(x => x.result.Item3);
+                var longestMatch = result.Where(x => x.result.Item1 == State.Success).MaxBy(x => x.result.Item3);
                 acc.AddRange(longestMatch.acc);
+                errors.AddRange(longestMatch.errors);
                 return longestMatch.result;
             };
         }

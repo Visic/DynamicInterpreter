@@ -42,7 +42,7 @@ namespace REPL {
                 Program._languageInterp = code => results.Item1(code, handlers);
                 _languagedLoaded = true;
                 BetterConsole.WriteOnNextLine($"{languageInfo.Name} loaded.");
-            } catch {
+            } catch(Exception ex) {
                 BetterConsole.WriteOnNextLine($"{args[0]} is not a path to a valid language assembly.");
             }
         }
