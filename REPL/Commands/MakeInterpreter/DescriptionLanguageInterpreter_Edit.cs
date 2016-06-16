@@ -55,8 +55,8 @@ namespace DynamicInterpreter {
             public string SymbolName { get; } = "repeat";
 
             public List<object> Call(List<object> args) {
-                var start = string.IsNullOrEmpty((string)args[2]) ? new int?() : int.Parse((string)args[2]);
-                var end = string.IsNullOrEmpty((string)args[4]) ? new int?() : int.Parse((string)args[4]);
+                var start = string.IsNullOrEmpty((string)args[2]) ? "null" : int.Parse((string)args[2]).ToString();
+                var end = string.IsNullOrEmpty((string)args[4]) ? "null" : int.Parse((string)args[4]).ToString();
                 return new List<object> { InterpreterCodeGenerator.Repeat((string)args[0], start, end) };
             }
         }
