@@ -12,31 +12,31 @@ namespace DynamicInterpreter {
             //////ADD HANDLERS HERE//////
             new IgnoreSymbolHandler("ignore_all_whitespace"),
             new IgnoreSymbolHandler("comment"),
-            new GenericSymbolHandler("symbol", args => new List<object> { new Union<Parse, Func<Parse>>(Parser.FixType(() => _assignedSymbols[(string)args[1]])) }),
-            new GenericSymbolHandler("negation", args => new List<object> { new Union<Parse, Func<Parse>>(Parser.Negate((Union<Parse, Func<Parse>>)args[1])) }),
-            new GenericSymbolHandler("group", args => new List<object> { (Union<Parse, Func<Parse>>)args[1] }),
-            new GenericSymbolHandler("EntryPoint", args => new List<object> { new Union<Parse, Func<Parse>>(_assignedSymbols["EntryPoint"]) }),
+            new GenericSymbolHandler("symbol", (i, args) => new List<object> { new Union<Parse, Func<Parse>>(Parser.FixType(() => _assignedSymbols[(string)args[1]])) }),
+            new GenericSymbolHandler("negation", (i, args) => new List<object> { new Union<Parse, Func<Parse>>(Parser.Negate((Union<Parse, Func<Parse>>)args[1])) }),
+            new GenericSymbolHandler("group", (i, args) => new List<object> { (Union<Parse, Func<Parse>>)args[1] }),
+            new GenericSymbolHandler("EntryPoint", (i, args) => new List<object> { new Union<Parse, Func<Parse>>(_assignedSymbols["EntryPoint"]) }),
             new CombineToStringSymbolHandler("integer"),
 
-            new GenericSymbolHandler("allchars_not_gt", args => {
+            new GenericSymbolHandler("allchars_not_gt", (i, args) => {
                 return new List<object> { args.Cast<string>().ToDelimitedString("").Replace(@"\>", ">") };
             }),
 
-            new GenericSymbolHandler("allchars_not_quote", args => {
+            new GenericSymbolHandler("allchars_not_quote", (i, args) => {
                 return new List<object> { args.Cast<string>().ToDelimitedString("").Replace(@"\'", "'") };
             }),
 
-            new GenericSymbolHandler("fallback_point", args => {
+            new GenericSymbolHandler("fallback_point", (i, args) => {
                 var assignment = (Tuple<string, Union<Parse, Func<Parse>>>)args[1];
                 return new List<object> { Tuple.Create(assignment.Item1, new Union<Parse, Func<Parse>>(Parser.FallbackPoint(assignment.Item2))) };
             }),
 
-            new GenericSymbolHandler("assignment", args => {
+            new GenericSymbolHandler("assignment", (i, args) => {
                 var str = ((string)args[1]).Replace("\\\\", "\\");
                 return new List<object>() { Tuple.Create(str, new Union<Parse, Func<Parse>>(Parser.Symbol(str, (Union<Parse, Func<Parse>>)args[4]))) };
             }),
 
-            new GenericSymbolHandler("all_all_assignments_and_comments", args => {
+            new GenericSymbolHandler("all_all_assignments_and_comments", (i, args) => {
                 var castArgs = args.Take(args.Count - 1).Cast<Tuple<string, Union<Parse, Func<Parse>>>>().ToArray();
                 foreach(var ele in castArgs) {
                     _assignedSymbols[ele.Item1] = Parser.Eval(ele.Item2);
@@ -44,32 +44,32 @@ namespace DynamicInterpreter {
                 return new List<object>();
             }),
 
-            new GenericSymbolHandler("all_inorder", args => {
+            new GenericSymbolHandler("all_inorder", (i, args) => {
                 if(args.Count == 1) return args;
                 return new List<object> { new Union<Parse, Func<Parse>>(Parser.InOrder(args.Cast<Union<Parse, Func<Parse>>>().ToArray())) };
             }),
 
-            new GenericSymbolHandler("repeat", args => {
+            new GenericSymbolHandler("repeat", (i, args) => {
                 var parser = (Union<Parse, Func<Parse>>)args[0];
                 var start = string.IsNullOrEmpty((string)args[2]) ? new int?() : int.Parse((string)args[2]);
                 var end = string.IsNullOrEmpty((string)args[4]) ? new int?() : int.Parse((string)args[4]);
                 return new List<object> { new Union<Parse, Func<Parse>>(Parser.Repeat(parser, start, end)) };
             }),
 
-            new GenericSymbolHandler("anychar", args => {
+            new GenericSymbolHandler("anychar", (i, args) => {
                 return new List<object> { new Union<Parse, Func<Parse>>(Parser.AnyChar()) };
             }),
 
-            new GenericSymbolHandler("range", args => {
+            new GenericSymbolHandler("range", (i, args) => {
                 return new List<object> { new Union<Parse, Func<Parse>>(Parser.Range(((string)args[1])[0], ((string)args[3])[0])) };
             }),
 
-            new GenericSymbolHandler("all_any", args => {
+            new GenericSymbolHandler("all_any", (i, args) => {
                 if(args.Count == 1) return args;
                 return new List<object> { new Union<Parse, Func<Parse>>(Parser.Any(args.Where(x => !(x is string)).Cast<Union<Parse, Func<Parse>>>().ToArray())) }; //just use the parsers, ignore the '|' strings
             }),
 
-            new GenericSymbolHandler("literal", args => {
+            new GenericSymbolHandler("literal", (i, args) => {
                 return new List<object> { new Union<Parse, Func<Parse>>(Parser.Literal(((string)args[1]).Replace("\\\\", "\\"))) };
             })
             //////ADD HANDLERS HERE//////
@@ -86,19 +86,7 @@ namespace DynamicInterpreter {
             var parserResult = new Result();
             var errors = new List<Error>();
             parser(code, 0, parserResult, errors);
-            return Tuple.Create(RecursiveEval(parserResult, handlers.ToDictionary(x => x.SymbolName)), errors);
-        }
-
-        private static List<object> RecursiveEval(Result result, Dictionary<string, ISymbolHandler> handlers) {
-            return result.SelectMany(
-                x => x.Match<List<object>>(
-                    val => new List<object>() { val },
-                    def => {
-                        var maybeHandler = handlers.TryGetValue(def.Item1);
-                        return maybeHandler.IsSome ? maybeHandler.Value.Call(RecursiveEval(def.Item2, handlers)) : RecursiveEval(def.Item2, handlers);
-                    }
-                )
-            ).ToList();
+            return Tuple.Create(Interpreter.RecursiveEval(parserResult, handlers.ToDictionary(x => x.SymbolName)), errors);
         }
     }
 }

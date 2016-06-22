@@ -39,16 +39,16 @@ namespace DynamicInterpreter {
 
         public static Tuple<List<object>, List<Error>> Execute(string code) {
             var parserResult = new Result();
-            var errors = new List<Error>();
-            _symbolParsers["EntryPoint"](code, 0, parserResult, errors);
+            var parserErrors = new List<Error>();
+            _symbolParsers["EntryPoint"](code, 0, parserResult, parserErrors);
 
-            List<object> result;
+            var evalResult = new List<object>();
             try {
-                result = Interpreter.RecursiveEval(parserResult, _symbolHandlers.ToDictionary(x => x.SymbolName));
+                evalResult = Interpreter.RecursiveEval(parserResult, _symbolHandlers.ToDictionary(x => x.SymbolName));
             } catch (Exception ex) {
-                result = new List<object>() { ex.Message };
+                evalResult.Add(new Error(ex.Message, -1));
             }
-            return Tuple.Create(result, errors);
+            return Tuple.Create(evalResult.Where(x => !(x is Error)).ToList(), evalResult.OfType<Error>().Concat(parserErrors).ToList());
         }
     }
 }

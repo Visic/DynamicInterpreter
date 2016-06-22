@@ -14,9 +14,8 @@ namespace DynamicInterpreter {
             new IgnoreSymbolHandler("argname_value_separator"),
             new IgnoreSymbolHandler("allwhitespace"),
             new CombineToStringSymbolHandler("argvalue"),
-            new GenericSymbolHandler("EntryPoint", x => x),
 
-            new GenericSymbolHandler("arg", x => {
+            new GenericSymbolHandler("arg", (i, x) => {
                 ArgsAndSettings._options.TryGetValue(x[1].ToString()).Apply(y => y(x.Skip(2).Select(z => z.ToString().Trim('\"')).ToArray()));
                 return new List<object>();
             })

@@ -8,30 +8,30 @@ namespace DynamicInterpreter {
     #region Symbol handlers
     public interface ISymbolHandler {
         string SymbolName { get; }
-        List<object> Call(List<object> args);
+        List<object> Call(int characterIndex, List<object> args);
     }
 
     public class GenericSymbolHandler : ISymbolHandler {
-        Func<List<object>, List<object>> _call;
+        Func<int, List<object>, List<object>> _call;
         
-        public GenericSymbolHandler(string name, Func<List<object>, List<object>> call) {
+        public GenericSymbolHandler(string name, Func<int, List<object>, List<object>> call) {
             SymbolName = name;
             _call = call;
         }
         
-        public GenericSymbolHandler(string name, Func<List<object>, object> call) : this(name, x => new List<object>(){ call(x) }) { }
-        public GenericSymbolHandler(string name, Action<List<object>> call) : this(name, x => { call(x); return new List<object>(); }) { }
+        public GenericSymbolHandler(string name, Func<int, List<object>, object> call) : this(name, (i, x) => new List<object>(){ call(i, x) }) { }
+        public GenericSymbolHandler(string name, Action<int, List<object>> call) : this(name, (i, x) => { call(i, x); return new List<object>(); }) { }
 
         public string SymbolName { get; }
-        public virtual List<object> Call(List<object> args) { return _call(args); }
+        public virtual List<object> Call(int characterIndex, List<object> args) { return _call(characterIndex, args); }
     }
 
     public class CombineToStringSymbolHandler : GenericSymbolHandler {
-        public CombineToStringSymbolHandler(string name) : base(name, x => new List<object>() { x.ToDelimitedString("") }) { }
+        public CombineToStringSymbolHandler(string name) : base(name, (i, x) => new List<object>() { x.ToDelimitedString("") }) { }
     }
 
     public class IgnoreSymbolHandler : GenericSymbolHandler {
-        public IgnoreSymbolHandler(string name) : base(name, x => new List<object>()) { }
+        public IgnoreSymbolHandler(string name) : base(name, (i, x) => new List<object>()) { }
     }
     #endregion
 
@@ -56,7 +56,7 @@ namespace DynamicInterpreter {
     }
 
     public enum State { Success, Failure }
-    public class Result : List<Union<string, Tuple<string, Result>>> { }
+    public class Result : List<Union<Tuple<int, string>, Tuple<int, string, Result>>> { }
     public delegate Tuple<State, string, int> Parse(string data, int charsHandledSoFar, Result acc, List<Error> errors);
     #endregion
 
@@ -65,10 +65,10 @@ namespace DynamicInterpreter {
         public static List<object> RecursiveEval(Result result, Dictionary<string, ISymbolHandler> handlers) {
             return result.SelectMany(
                 x => x.Match<List<object>>(
-                    val => new List<object>() { val },
+                    val => new List<object>() { val.Item2 },
                     def => {
-                        var maybeHandler = handlers.TryGetValue(def.Item1);
-                        return maybeHandler.IsSome ? maybeHandler.Value.Call(RecursiveEval(def.Item2, handlers)) : RecursiveEval(def.Item2, handlers);
+                        var maybeHandler = handlers.TryGetValue(def.Item2);
+                        return maybeHandler.IsSome ? maybeHandler.Value.Call(def.Item1, RecursiveEval(def.Item3, handlers)) : RecursiveEval(def.Item3, handlers);
                     }
                 )
             ).ToList();
@@ -85,7 +85,7 @@ namespace DynamicInterpreter {
                 var result = Eval(parser)(data, charsHandledSoFar, newAcc, newErrors);
 
                 if(result.Item1 == State.Success) {
-                    acc.Add(Tuple.Create(symbolName, newAcc));
+                    acc.Add(Tuple.Create(charsHandledSoFar, symbolName, newAcc));
                 }
 
                 if(newErrors.Count > 0) {
@@ -146,7 +146,7 @@ namespace DynamicInterpreter {
                 if(emptyCheck.IsSome) return emptyCheck.Value;
 
                 if(Methods.IsBetween_Inclusive(start, end, data[0])) {
-                    acc.Add(data[0].ToString());
+                    acc.Add(Tuple.Create(charsHandledSoFar, data[0].ToString()));
                     return Tuple.Create(State.Success, data.Substring(1), charsHandledSoFar + 1);
                 } else {
                     errors.Add(new Error($"Expected a character in the range [{start}-{end}]", charsHandledSoFar));
@@ -158,7 +158,7 @@ namespace DynamicInterpreter {
         public static Parse Literal(string value) {
             return (data, charsHandledSoFar, acc, errors) => {
                 if(data.StartsWith(value)) {
-                    acc.Add(value);
+                    acc.Add(Tuple.Create(charsHandledSoFar, value));
                     return Tuple.Create(State.Success, data.Remove(0, value.Length), charsHandledSoFar + value.Length);
                 } else {
                     errors.Add(new Error($"Expected {value}", charsHandledSoFar));
@@ -171,7 +171,7 @@ namespace DynamicInterpreter {
             return (data, charsHandledSoFar, acc, errors) => {
                 var emptyCheck = CannotBeEmpty(data, charsHandledSoFar, errors);
                 if(emptyCheck.IsSome) return emptyCheck.Value;
-                acc.Add(data[0].ToString());
+                acc.Add(Tuple.Create(charsHandledSoFar, data[0].ToString()));
                 return Tuple.Create(State.Success, data.Substring(1), charsHandledSoFar + 1);
             };
         }
