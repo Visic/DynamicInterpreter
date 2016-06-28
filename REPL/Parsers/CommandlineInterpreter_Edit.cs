@@ -15,7 +15,7 @@ namespace DynamicInterpreter {
             new IgnoreSymbolHandler("allwhitespace"),
             new CombineToStringSymbolHandler("argvalue"),
 
-            new GenericSymbolHandler("arg", (i, x) => {
+            new GenericSymbolHandler("arg", x => {
                 ArgsAndSettings._options.TryGetValue(x[1].ToString()).Apply(y => y(x.Skip(2).Select(z => z.ToString().Trim('\"')).ToArray()));
                 return new List<object>();
             })

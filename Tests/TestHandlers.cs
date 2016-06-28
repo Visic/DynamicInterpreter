@@ -13,7 +13,7 @@ namespace Tests {
 
         public string SymbolName { get; private set; }
 
-        public List<object> Call(int characterIndex, List<object> args) {
+        public List<object> Call(List<object> args) {
             return _handler(args);
         }
 

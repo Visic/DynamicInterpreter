@@ -8,30 +8,30 @@ namespace DynamicInterpreter {
     #region Symbol handlers
     public interface ISymbolHandler {
         string SymbolName { get; }
-        List<object> Call(int characterIndex, List<object> args);
+        List<object> Call(List<object> args);
     }
 
     public class GenericSymbolHandler : ISymbolHandler {
-        Func<int, List<object>, List<object>> _call;
+        Func<List<object>, List<object>> _call;
         
-        public GenericSymbolHandler(string name, Func<int, List<object>, List<object>> call) {
+        public GenericSymbolHandler(string name, Func<List<object>, List<object>> call) {
             SymbolName = name;
             _call = call;
         }
         
-        public GenericSymbolHandler(string name, Func<int, List<object>, object> call) : this(name, (i, x) => new List<object>(){ call(i, x) }) { }
-        public GenericSymbolHandler(string name, Action<int, List<object>> call) : this(name, (i, x) => { call(i, x); return new List<object>(); }) { }
+        public GenericSymbolHandler(string name, Func<List<object>, object> call) : this(name, x => new List<object>(){ call(x) }) { }
+        public GenericSymbolHandler(string name, Action<List<object>> call) : this(name, x => { call(x); return new List<object>(); }) { }
 
         public string SymbolName { get; }
-        public virtual List<object> Call(int characterIndex, List<object> args) { return _call(characterIndex, args); }
+        public virtual List<object> Call(List<object> args) { return _call(args); }
     }
 
     public class CombineToStringSymbolHandler : GenericSymbolHandler {
-        public CombineToStringSymbolHandler(string name) : base(name, (i, x) => new List<object>() { x.ToDelimitedString("") }) { }
+        public CombineToStringSymbolHandler(string name) : base(name, x => new List<object>() { x.ToDelimitedString("") }) { }
     }
 
     public class IgnoreSymbolHandler : GenericSymbolHandler {
-        public IgnoreSymbolHandler(string name) : base(name, (i, x) => new List<object>()) { }
+        public IgnoreSymbolHandler(string name) : base(name, x => new List<object>()) { }
     }
     #endregion
 
@@ -62,16 +62,30 @@ namespace DynamicInterpreter {
 
     #region Interpreter methods and helper functions
     public static class Interpreter {
-        public static List<object> RecursiveEval(Result result, Dictionary<string, ISymbolHandler> handlers) {
-            return result.SelectMany(
-                x => x.Match<List<object>>(
+        public static Union<List<object>, Error> RecursiveEval(Result parserResult, Dictionary<string, ISymbolHandler> handlers) {
+            var result = new List<object>();
+            foreach(var ele in parserResult) {
+                var partialResultOrError = ele.Match<Union<List<object>, Error>>(
                     val => new List<object>() { val.Item2 },
-                    def => {
-                        var maybeHandler = handlers.TryGetValue(def.Item2);
-                        return maybeHandler.IsSome ? maybeHandler.Value.Call(def.Item1, RecursiveEval(def.Item3, handlers)) : RecursiveEval(def.Item3, handlers);
-                    }
-                )
-            ).ToList();
+                    def => RecursiveEval(def.Item3, handlers).Match<Union<List<object>, Error>>(
+                        args => handlers.TryGetValue(def.Item2).Match<Union<List<object>, Error>>(
+                            handler => {
+                                try {
+                                    return handler.Call(args);
+                                } catch (Exception ex) {
+                                    return new Error(ex.Message, def.Item1);
+                                }
+                            }, 
+                            noHandler => args //no handler defined, just return what we have
+                        ),
+                        err => err //just return the error
+                    )
+                );
+
+                //if there is an error, return it, otherwise aggregate the results
+                if (partialResultOrError.Match(x => result.AddRange(x), x => true).IsSome) return partialResultOrError;
+            }
+            return result;
         }
     }
     #endregion

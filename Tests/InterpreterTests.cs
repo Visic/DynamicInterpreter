@@ -13,7 +13,7 @@ namespace Tests {
         [Test, Description("This is just a test to make sure our support 'Handler' objects are working")]
         public void DynamicHandlerTest() {
             var addHandler = Handler.Create("add", args => args.Select(x => int.Parse(x.ToString())).Sum());
-            var result = addHandler.Call(0, new List<object>() { "1", "123" });
+            var result = addHandler.Call(new List<object>() { "1", "123" });
             Expect(result[0], Is.EqualTo(124));
         }
 

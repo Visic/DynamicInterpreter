@@ -41,14 +41,17 @@ namespace DynamicInterpreter {
             var parserResult = new Result();
             var parserErrors = new List<Error>();
             _symbolParsers["EntryPoint"](code, 0, parserResult, parserErrors);
-
-            var evalResult = new List<object>();
-            try {
-                evalResult = Interpreter.RecursiveEval(parserResult, _symbolHandlers.ToDictionary(x => x.SymbolName));
-            } catch (Exception ex) {
-                evalResult.Add(new Error(ex.Message, -1));
-            }
-            return Tuple.Create(evalResult.Where(x => !(x is Error)).ToList(), evalResult.OfType<Error>().Concat(parserErrors).ToList());
+            
+            return Interpreter.RecursiveEval(
+                parserResult, 
+                _symbolHandlers.ToDictionary(x => x.SymbolName)
+            ).Match<Tuple<List<object>, List<Error>>>(
+                result => Tuple.Create(result, parserErrors), 
+                err => {
+                    parserErrors.Insert(0, err);
+                    return Tuple.Create(new List<object>(), parserErrors);
+                }
+            );
         }
     }
 }

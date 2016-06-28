@@ -23,7 +23,7 @@ namespace ParserGraphing {
     public class LiteralHandler : ISymbolHandler {
         public string SymbolName { get; } = "literal";
 
-        public List<object> Call(int characterIndex, List<object> args) {
+        public List<object> Call(List<object> args) {
             return new List<object> { (string)args[1] };
         }
     }
@@ -31,7 +31,7 @@ namespace ParserGraphing {
     public class SymbolHandler : ISymbolHandler {
         public string SymbolName { get; } = "symbol";
 
-        public List<object> Call(int characterIndex, List<object> args) {
+        public List<object> Call(List<object> args) {
             return new List<object> { (string)args[1] };
         }
     }
@@ -39,7 +39,7 @@ namespace ParserGraphing {
     public class AnyCharHandler : ISymbolHandler {
         public string SymbolName { get; } = "anychar";
 
-        public List<object> Call(int characterIndex, List<object> args) {
+        public List<object> Call(List<object> args) {
             return new List<object> { "*" };
         }
     }
@@ -47,7 +47,7 @@ namespace ParserGraphing {
     public class RangeHandler : ISymbolHandler {
         public string SymbolName { get; } = "range";
 
-        public List<object> Call(int characterIndex, List<object> args) {
+        public List<object> Call(List<object> args) {
             var nodeName = $"[{((string)args[1])[0]} - {((string)args[3])[0]}]";
             return new List<object> { nodeName };
         }
@@ -56,7 +56,7 @@ namespace ParserGraphing {
     //public class FallbackPointHandler : ISymbolHandler {
     //    public string SymbolName { get; } = "fallback_point";
 
-    //    public List<object> Call(int characterIndex, List<object> args) {
+    //    public List<object> Call(List<object> args) {
     //        var assignment = (Tuple<string, string>)args[1];
     //        return new List<object> { Tuple.Create(assignment.Item1, ParserCodeGenerator.FallbackPoint(assignment.Item2)) };
     //    }
@@ -65,7 +65,7 @@ namespace ParserGraphing {
     public class InOrderHandler : ISymbolHandler {
         public string SymbolName { get; } = "all_inorder";
 
-        public List<object> Call(int characterIndex, List<object> args) {
+        public List<object> Call(List<object> args) {
             for(int i = 0; i < args.Count - 1; ++i) {
                 GraphHelper.AddEdge((string)args[i], (string)args[i + 1]);
             }
@@ -76,7 +76,7 @@ namespace ParserGraphing {
     public class AnyHandler : ISymbolHandler {
         public string SymbolName { get; } = "all_any";
 
-        public List<object> Call(int characterIndex, List<object> args) {
+        public List<object> Call(List<object> args) {
             var nodes = args.Split(x => (string)x == "|").ToArray();
             foreach(var ele in nodes) {
                 GraphHelper.AddNode((string)ele.Last());
@@ -89,7 +89,7 @@ namespace ParserGraphing {
     public class AssignmentHandler : ISymbolHandler {
         public string SymbolName { get; } = "assignment";
 
-        public List<object> Call(int characterIndex, List<object> args) {
+        public List<object> Call(List<object> args) {
             var newSymbolName = (string)args[1];
             return new List<object> { };
         }
@@ -98,7 +98,7 @@ namespace ParserGraphing {
     //public class NegationHandler : ISymbolHandler {
     //    public string SymbolName { get; } = "negation";
 
-    //    public List<object> Call(int characterIndex, List<object> args) {
+    //    public List<object> Call(List<object> args) {
     //        return new List<object> { ParserCodeGenerator.Negate((string)args[1]) };
     //    }
     //}
@@ -110,7 +110,7 @@ namespace ParserGraphing {
     public class AllCharsNotGTHandler : ISymbolHandler {
         public string SymbolName { get; } = "allchars_not_gt";
 
-        public List<object> Call(int characterIndex, List<object> args) {
+        public List<object> Call(List<object> args) {
             return new List<object> { args.Cast<string>().ToDelimitedString("").Replace(@"\>", ">") };
         }
     }
@@ -118,7 +118,7 @@ namespace ParserGraphing {
     public class AllCharsNotQuoteHandler : ISymbolHandler {
         public string SymbolName { get; } = "allchars_not_quote";
 
-        public List<object> Call(int characterIndex, List<object> args) {
+        public List<object> Call(List<object> args) {
             return new List<object> { args.Cast<string>().ToDelimitedString("").Replace(@"\'", "'") };
         }
     }

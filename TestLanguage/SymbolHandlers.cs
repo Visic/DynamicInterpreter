@@ -7,13 +7,8 @@ namespace TestLanguage {
     public class AddHandler : ISymbolHandler {
         public string SymbolName { get; } = "add";
 
-        public List<object> Call(int characterIndex, List<object> args) {
-            int left, right;
-            var errStrFmt = "{0} is not between -2^31 and 2^31 - 1";
-            if (!int.TryParse(args[0].ToString(), out left)) return new List<object>() { new Error(string.Format(errStrFmt, args[0]), characterIndex) };
-            if(!int.TryParse(args[4].ToString(), out right)) return new List<object>() { new Error(string.Format(errStrFmt, args[4]), characterIndex) };
-
-            return new List<object>() { left + right };
+        public List<object> Call(List<object> args) {
+            return new List<object>() { (int)args[0] + (int)args[4] };
         }
     }
 
@@ -24,8 +19,12 @@ namespace TestLanguage {
     public class IntegerHandler : ISymbolHandler {
         public string SymbolName { get; } = "integer";
 
-        public List<object> Call(int characterIndex, List<object> args) {
-            return new List<object>() { Tuple.Create(characterIndex, string.Join("", args.Cast<string>().ToArray())) };
+        public List<object> Call(List<object> args) {
+            int value;
+            var intStr = string.Join("", args.Cast<string>().ToArray());
+            if (!int.TryParse(intStr, out value)) throw new Exception(string.Format("{0} is not between -2^31 and 2^31 - 1", intStr));
+
+            return new List<object> { value };
         }
     }
 }

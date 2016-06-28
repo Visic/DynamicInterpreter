@@ -10,7 +10,7 @@ namespace DynamicInterpreter {
             //////ADD HANDLERS HERE//////
             new CombineToStringSymbolHandler("arg"),
             new CombineToStringSymbolHandler("cmdname"),
-            new GenericSymbolHandler("command", (i, x) => Program.CallREPLCommand(x))
+            new GenericSymbolHandler("command", x => Program.CallREPLCommand(x))
             //////ADD HANDLERS HERE//////
         };
     }
