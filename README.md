@@ -9,14 +9,14 @@ Example of the description language (This is actually the current description la
 \<almost_all_escape_chars\> = '\\\\'--'\\\\'|'\\\\'\<almost_all_escape_chars\>
 \<all_whitespace\> = \<whitespace\>|\<whitespace\>\<all_whitespace\>
 \<ignore_all_whitespace\> = ''|\<all_whitespace\>
-\<anychar\> = '*'
+\<anychar\> = '.'
 
-\<range\> = '[' ('\\\\]'|'\\\\-'|-('-'|']')*) '-' ('\\\\]'|'\\\\-'|-('-'|']')*) ']'
+\<range\> = '[' ('\\\\]'|'\\\\-'|-('-'|']').) '-' ('\\\\]'|'\\\\-'|-('-'|']').) ']'
 
-\<allchars_not_quote\> = -('\\''|\<escaped\>\<almost_all_escape_chars\>'\\\\\\'')(--\<escaped\>\<all_escape_chars\>*|-\<escaped\>\<all_escape_chars\>|*)(''|\<allchars_not_quote\>)
+\<allchars_not_quote\> = -('\\''|\<escaped\>\<almost_all_escape_chars\>'\\\\\\'')(--\<escaped\>\<all_escape_chars\>.|-\<escaped\>\<all_escape_chars\>|.)(''|\<allchars_not_quote\>)
 \<literal\> = '\\''(''|\<allchars_not_quote\>)'\\''
 
-\<allchars_not_gt\> = -('\>'|\<escaped\>\<almost_all_escape_chars\>'\\\\\>')(--\<escaped\>\<all_escape_chars\>*|-\<escaped\>\<all_escape_chars\>|*)(''|\<allchars_not_gt\>)
+\<allchars_not_gt\> = -('\>'|\<escaped\>\<almost_all_escape_chars\>'\\\\\>')(--\<escaped\>\<all_escape_chars\>.|-\<escaped\>\<all_escape_chars\>|.)(''|\<allchars_not_gt\>)
 \<symbol\> = '\<'\<allchars_not_gt\>'\>'
 
 \<inorder_ele\> = \<ignore_all_whitespace\>(\<symbol\>\<ignore_all_whitespace\>-'='|\<literal\>|\<group\>|\<negation\>|\<anychar\>|\<range\>)

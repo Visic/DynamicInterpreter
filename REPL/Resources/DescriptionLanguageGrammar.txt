@@ -5,17 +5,18 @@
 <almost_all_escape_chars> = '\\'--'\\'|'\\'<almost_all_escape_chars>
 <all_whitespace> = <whitespace>|<whitespace><all_whitespace>
 <ignore_all_whitespace> = ''|<all_whitespace>
-<anychar> = '*'
+<anychar> = '.'
+<return_type> = .[:]
 
-<range> = '[' <ignore_all_whitespace> ('\\]'|'\\:'|-(':'|']')*) <ignore_all_whitespace> ':' <ignore_all_whitespace> ('\\]'|'\\:'|-(':'|']')*) <ignore_all_whitespace> ']'
+<range> = '[' <ignore_all_whitespace> ('\\]'|'\\:'|-(':'|']').) <ignore_all_whitespace> ':' <ignore_all_whitespace> ('\\]'|'\\:'|-(':'|']').) <ignore_all_whitespace> ']'
 
-<comment_text> = (-<newline>*)(<comment_text>|'')
+<comment_text> = (-<newline>.)(<comment_text>|'')
 <comment> = '//'<comment_text>
 
-<allchars_not_quote> = -('\''|<escaped><almost_all_escape_chars>'\\\'')(--<escaped><all_escape_chars>*|-<escaped><all_escape_chars>|*)(''|<allchars_not_quote>)
+<allchars_not_quote> = -('\''|<escaped><almost_all_escape_chars>'\\\'')(--<escaped><all_escape_chars>.|-<escaped><all_escape_chars>|.)(''|<allchars_not_quote>)
 <literal> = '\''(''|<allchars_not_quote>)'\''
 
-<allchars_not_gt> = -('>'|<escaped><almost_all_escape_chars>'\\>')(--<escaped><all_escape_chars>*|-<escaped><all_escape_chars>|*)(''|<allchars_not_gt>)
+<allchars_not_gt> = -('>'|<escaped><almost_all_escape_chars>'\\>')(--<escaped><all_escape_chars>.|-<escaped><all_escape_chars>|.)(''|<allchars_not_gt>)
 <symbol> = '<'<allchars_not_gt>'>'
 
 <inorder_ele> = <ignore_all_whitespace>(<symbol><ignore_all_whitespace>-'='|<literal>|<group>|<negation>|<anychar>|<range>|<repeat>)
