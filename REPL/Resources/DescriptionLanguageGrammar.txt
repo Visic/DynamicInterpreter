@@ -1,21 +1,20 @@
 <newline> = '\r\n'|'\n'
 <whitespace> = ' '|'\t'|<newline>
-<escaped> = '\\'-'\\'|'\\\\'<escaped>
-<all_escape_chars> = '\\'|'\\'<all_escape_chars>
-<almost_all_escape_chars> = '\\'--'\\'|'\\'<almost_all_escape_chars>
 <all_whitespace> = <whitespace>|<whitespace><all_whitespace>
 <ignore_all_whitespace> = ''|<all_whitespace>
 <anychar> = '.'
+<escaped_char> = '\\'.
+<char_or_escaped> = .|<escaped_char>
 
 <range> = '[' <ignore_all_whitespace> ('\\]'|'\\:'|-(':'|']').) <ignore_all_whitespace> ':' <ignore_all_whitespace> ('\\]'|'\\:'|-(':'|']').) <ignore_all_whitespace> ']'
 
 <comment_text> = (-<newline>.)(<comment_text>|'')
 <comment> = '//'<comment_text>
 
-<allchars_not_quote> = -('\''|<escaped><almost_all_escape_chars>'\\\'')(--<escaped><all_escape_chars>.|-<escaped><all_escape_chars>|.)(''|<allchars_not_quote>)
+<allchars_not_quote> = (-'\''<char_or_escaped>){:}
 <literal> = '\''(''|<allchars_not_quote>)'\''
 
-<allchars_not_gt> = -('>'|<escaped><almost_all_escape_chars>'\\>')(--<escaped><all_escape_chars>.|-<escaped><all_escape_chars>|.)(''|<allchars_not_gt>)
+<allchars_not_gt> = (-'>'<char_or_escaped>){:}
 <symbol> = '<'<allchars_not_gt>'>'
 
 <inorder_ele> = <ignore_all_whitespace>(<symbol><ignore_all_whitespace>-'='|<literal>|<group>|<negation>|<anychar>|<range>|<repeat>)
