@@ -6,7 +6,6 @@
 <all_whitespace> = <whitespace>|<whitespace><all_whitespace>
 <ignore_all_whitespace> = ''|<all_whitespace>
 <anychar> = '.'
-<return_type> = .[:]
 
 <range> = '[' <ignore_all_whitespace> ('\\]'|'\\:'|-(':'|']').) <ignore_all_whitespace> ':' <ignore_all_whitespace> ('\\]'|'\\:'|-(':'|']').) <ignore_all_whitespace> ']'
 
